@@ -1,29 +1,78 @@
-Data,Dia,Y numèrica,Dolor M,Dolor V,Passos,Son,Qualitat,Inflamació,Coixesa,Magneto,Fisio,Exercicis,Trigger,Observacions
-1-gen,1,4.5,4.5,4.5,300,7,60,4,4,,No,No,Inici recuperació,Primer dia. Molt de dolor al matí. Difícil caminar.
-2-gen,2,4.2,4.5,4,400,6.5,55,4,3.5,,No,No,,Millora mínima. Repòs total recomanat.
-3-gen,3,4,4,4,500,7,65,3.5,3,,No,No,,Dolor persistent. Crioterapia 3x.
-4-gen,4,3.8,4,3.5,600,7.5,70,3,3,,Sí,No,Primera fisio,Primera sessió de fisioteràpia. Allau al tendó.
-5-gen,5,3.5,3.5,3.5,700,7,65,3,2.5,1h,Sí,Sí,,Millora lleugera. Exercicis suaus.
-6-gen,6,3.8,4,3.5,500,6.5,55,3.5,3,,No,No,Sobrecàrrega,Massa activitat ahir. Regressió.
-7-gen,7,3.3,3.5,3,800,8,75,2.5,2.5,1h,Sí,Sí,,Millora progressiva. Magneto ajuda.
-8-gen,8,3,3,3,1000,7.5,70,2.5,2,1h,Sí,Sí,,Primera setmana millor. Constància.
-9-gen,9,2.8,3,2.5,1200,8,80,2,2,1h,No,Sí,,Bon dia. Menys rigidesa matinal.
-10-gen,10,3,3.5,2.5,900,7,65,2.5,2,,Sí,Sí,Fisio,Sessió intensa. Dolor post-fisio normal.
-11-gen,11,2.5,2.5,2.5,1500,8,80,2,1.5,1h,No,Sí,,Excel·lent. Millor dia fins ara.
-12-gen,12,2.8,3,2.5,1300,7.5,75,2,2,,Sí,Sí,,Estable. Exercicis de cadena tancada.
-13-gen,13,2.3,2.5,2,1800,8,85,1.5,1.5,1h,No,Sí,,Molt bé. Poca inflamació.
-14-gen,14,2.5,2.5,2.5,1600,7.5,75,1.5,2,,Sí,Sí,Fisio,Valoració 2 setmanes. Progrés notable.
-15-gen,15,2.2,2.5,2,2000,8,85,1,1.5,1h,No,Sí,,Bon dia. Passos creixent gradualment.
-16-gen,16,2,2,2,2200,8.5,90,1,1,1h,Sí,Sí,,Excel·lent evolució. Inflamació quasi nul·la.
-17-gen,17,2.5,2.5,2.5,1800,7,65,1.5,1.5,,No,No,Cansament,Dia cansat. Menys activitat.
-18-gen,18,2.2,2.5,2,2100,8,80,1,1.5,1h,Sí,Sí,,Recuperació ràpida. Bona resposta.
-19-gen,19,2,2,2,2400,8.5,85,1,1,1h,No,Sí,,Molt bé. Tolerant bé la càrrega.
-20-gen,20,1.8,2,1.5,2800,8,85,0.5,1,,Sí,Sí,Fisio,Visita traumatòleg Dr. Ríos. Bona evolució.
-21-gen,21,1.5,1.5,1.5,3000,9,90,0.5,0.5,1h,No,Sí,,Excel·lent dia. Quasi sense dolor.
-22-gen,22,2,2,2,2500,7.5,75,1,1,,Sí,Sí,,Lleuger increment per activitat. Normal.
-23-gen,23,1.8,2,1.5,3200,8,85,0.5,0.5,1h,No,Sí,,Molt bé. Tendència molt positiva.
-24-gen,24,2.2,2.5,2,2800,7,70,1,1,,Sí,Sí,Fisio,Sessió fisioteràpia. Exercicis de força.
-25-gen,25,1.8,2,1.5,3500,8.5,88,0.5,0.5,1h,No,Sí,,Bon dia. Passos elevats sense conseqüències.
-26-gen,26,1.5,1.5,1.5,3800,9,92,0.5,0.5,1h,Sí,Sí,,Millora consolidada. Activitat alta tolerable.
-27-gen,27,2,2,2,3200,8,80,1,1,,No,Sí,,Lleuger augment. Possiblement per fred.
-28-gen,28,1.8,2,1.5,3600,8.5,85,0.5,0.5,1h,Sí,Sí,Fisio,Fisio satisfactòria. Progrés constant.
+Data,Dia,Y numèrica,Passos,Son,Qualitat,Magneto,Fisio,Exercicis,Dolor M,Dolor V,Coixesa,Inflamació,Trigger,Observacions
+20-març,1,4.8,,,,2h,Sí,,4.5,5,3.33,3,,Inici rehabilitació (fisioteràpia/mútua)
+21-març,2,3.1,2500,,,2h,No,,3,3,1.67,1.67,,Inici millora
+22-març,3,4.9,7000,,,2h,No,,2,5,3.33,2.5,CÀRREGA,Pic càrrega
+23-març,4,4.5,4500,,,2h,Sí,,4,4.5,3.33,2.5,CÀRREGA,Dolor alt
+24-març,5,4.3,3500,,,2h,Sí,,4,4.5,3.33,2.5,CÀRREGA,
+25-març,6,4.1,5800,,,2h,Sí,,4,4.2,3.33,2.5,CÀRREGA,
+26-març,7,4,3800,,,2h,Sí,,3.8,4,3.33,2.5,CÀRREGA,
+27-març,8,3.9,4500,,,2h,Sí,,3.8,4,3.33,2.5,CÀRREGA,
+28-març,9,3.7,5500,,,2h,No,,3.5,4,3.33,2.5,CÀRREGA,Cap de setmana / càrrega alta
+29-març,10,3.7,3900,,,2h,No,,3.5,4,3.33,2.5,CÀRREGA,Cap de setmana
+30-març,11,3.6,2950,,,2h,Sí,,3.5,3.8,3.33,2.5,,Confirmació baixa
+31-març,12,3.5,2600,8h30,,2h,Sí,,3.5,3.5,3.33,2.5,,Agulletes
+1-abr,13,3.5,3500,6h45,,2h,Sí,,3.5,3.5,3.33,2.5,CÀRREGA,Fatiga muscular
+2-abr,14,3.4,4000,6h30,81,2h,Sí,,3.2,3.5,3.33,2.5,CÀRREGA,Millor del previst
+3-abr,15,3.3,,,,2h,Sí,,3.2,3.5,3.33,2.5,,Sense registre complet
+4-abr,16,3.2,2405,7h37,94,2h,No,,3.2,3.2,3.33,2.5,,Molt bon dia
+5-abr,17,3.1,3000,6h34,73,2h,No,,3,3.2,3.33,2.5,CÀRREGA,Maletes
+6-abr,18,3,660,8h33,77,2h,Sí,,3,3,3.33,2.5,DESCÀRREGA,Recuperació clara
+7-abr,19,3,4950,,,2h,Sí,,3,3,3.33,2.5,CÀRREGA,Alta càrrega
+8-abr,20,3,4950,6h30,72,1h,Sí,Sí,3,3,3.33,2.5,CÀRREGA,Inici control / fisio + bici
+9-abr,21,1.84,4900,7h,82,1h,Sí,Sí,2.5,1.5,1.67,1.67,CÀRREGA,Molt bon dia / fisio + bici
+10-abr,22,2.04,3950,6h30,75,2h,Sí,Sí,2,2,2.5,1.67,CÀRREGA,Sessió fisio + 2h magneto
+11-abr,23,1.44,1340,8h30,85,3h,No,Sí,1.2,1.2,1.67,1.67,,Molt bon dia / dret fent barbacoa
+12-abr,24,1.58,3200,7h40,88,2.5h,No,Sí,1.5,1.5,1.67,1.67,CÀRREGA,Piscina
+13-abr,25,2.39,3100,6h,70,2h,Sí,Sí,,3,2.5,1.67,ACTIVA,Fisio nova amb electroestimulació activa
+14-abr,26,3.5,,7h30,88,,,,3.5,,,,,Sobrecàrrega / dades parcials
+15-abr,27,2.9,2000,6h50,75,,No,Sí,3.5,3,2.5,2.5,NERVI,Punxades sota turmell en repòs
+16-abr,28,2.8,5500,,,1h,Sí,No,3,3,2.5,2.5,CÀRREGA,Diagnòstic mecànic + microrotura / visita trauma
+17-abr,29,2.1,2250,7h,88,2h,Sí,No,2.8,2.2,1.67,1.67,RECUP,Control real
+18-abr,30,2,1600,7h10,88,1h39,No,Sí,2.5,2,2,1.67,,Bon dia / sense sensacions nervioses
+19-abr,31,1.8,3050,6h55,75,1h,No,No,2,1.5,1.67,,DRET,4h dret (fotos furgo Begues)
+20-abr,32,2.3,2800,7h52,88,1h30,Sí,No,1.2,2.5,2,1.67,MECÀNIC,Muletes amb patró incorrecte
+21-abr,33,2.8,3800,7h,81,1h,No,No,2.5,3,2.5,2.1,COTXE,Conducció BCN (embragatge)
+22-abr,34,3.4,2490,6h30,70,,Sí,No,2.5,4,3.33,3,RETARD,Efecte retardat conducció
+23-abr,35,1.9,1950,,,2h,Sí,No,1.8,2,2.17,2.17,RECUP,Recuperació post-pic
+24-abr,36,1.75,2650,6h30,80,3h,Sí,Sí,1.5,1.5,2,2,,Consolidació / bessó carregat
+25-abr,37,1.48,1410,,,3h,No,No,2,1.5,1.2,1.2,DESCÀRREGA,Descàrrega clara
+26-abr,38,1.18,610,8h45,94,,,,1.1,1.4,1.1,1.1,SENSE TRIGGER,Un dels millors dies / descàrrega
+27-abr,39,4,3700,6h45,72,2h,Sí,Sí,1.8,4,5,5,ACTIVA + CÀRREGA,Reacció al final del dia / analgesic
+28-abr,40,2.2,3200,7h01,79,2h,No,No,2,2,2,2,POST-TRIGGER,Condicionat per analgèsia dia 27
+29-abr,41,2.25,3606,7h32,82,3h,Sí,Sí,2,2.5,2.5,2,POST-TRIGGER + ACTIVA,Efecte acumulat + activació
+1-maig,43,1.95,1500,7h30,88,2h,No,No,1.8,2,2,2,DESCÀRREGA,Càrrega baixa resposta estable
+2-maig,44,1.93,2100,7h10,70,2h,No,No,1.9,1.8,2,2,,Càrrega moderada resposta estable
+3-maig,45,2.73,3800,7h,68,Sí,No,No,1.9,3.5,3,2.5,CÀRREGA + MECÀNIC,Dolor sota dits en ambdós peus
+4-maig,46,2.25,1600,7h30,88,2h,No,Sí,3,2,2,2,POST-TRIGGER + ACTIVA,Millora al vespre / bici ben tolerada
+5-maig,47,2.05,1534,7h02,88,3h,No,Sí,2.8,1.8,1.8,1.8,POST-TRIGGER + ACTIVA,Millora clara al vespre
+6-maig,48,1.8,2400,7h05,85,3h,Sí,Sí,2.7,1.5,1.5,1.5,ACTIVA,Revisió fisio general / bessons i isquios millorats
+7-maig,49,1.63,2500,7h,80,2h,Sí,Sí,2.3,1.4,1.4,1.4,ACTIVA,Molt bona resposta després de fisio i exercicis
+8-maig,50,2,2200,7h11,82,2h,Sí,No,2,2,2,2,ACTIVA,Ajust podològic de plantilles
+9-maig,51,1.68,3206,6h05,70,2h,No,No,1.9,1.6,1.6,1.6,CÀRREGA,Primer dia sense paracetamol
+10-maig,52,1.93,3022,6h30,78,2h,No,Sí,1.7,2,2,2,ACTIVA + CALÇAT,Dolor entre turmell i taló
+11-maig,53,3.63,2066,6h,72,2h,Sí,No,3,3.5,4,4,POST-CÀRREGA MECÀNICA,Taló molt inflamat i sensible
+12-maig,54,2.75,2300,5h15,56,2h,Sí,Sí,3,2.5,2.5,3,POST-REACCIÓ,Millor al vespre que al matí
+13-maig,55,2.05,2340,7h13,83,2h,Sí,Sí,2.2,2,2,2,POST-REACCIÓ + ACTIVA,Clara millora respecte pic dia 11
+14-maig,56,1.93,2500,6h50,75,3h,Sí,Sí,2,1.9,1.9,1.9,ACTIVA,Bona estabilització després del pic
+15-maig,57,3.1,4948,5h50,68,,Sí,No,2.2,3,3,2.8,CÀRREGA MECÀNICA,Pessigolleig i sensació de trepitjar morats
+16-maig,58,2.8,2800,7h45,85,3h,No,No,2.8,2.9,3,2.5,POST-CÀRREGA PLANTAR,Sensació de raïms/pessigolleig plantar bilateral
+17-maig,59,2.83,4350,7h30,80,1h,No,No,2.7,3.2,2.9,2.5,CÀRREGA PLANTAR BILATERAL,Sensació de formigueig i trepitjar raïms
+18-maig,60,2.38,3800,6h40,80,3h,Sí,No,2.6,2.5,2.2,2.2,CÀRREGA PLANTAR,Lleugeres punxades sota el taló
+19-maig,61,2.35,2901,6h50,81,2h,Sí,Sí,2.5,2.6,2.2,2.1,ACTIVA + RECUPERACIÓ,Lleugeres punxades sota el taló
+20-maig,62,2.25,2823,6h55,80,3h,Sí,Sí,2.7,2.3,2,2,RECUPERACIÓ ACTIVA,Bona resposta a fisio completa
+21-maig,63,2.175,2332,7h10,80,2h,Sí,Sí,2.7,2,2,2,RECUPERACIÓ ACTIVA,Visita trauma BCN
+22-maig,64,2.15,2496,6h45,79,1h,Sí,Sí,2.6,2,2,2,,Càrrega bilateral només al vespre
+23-maig,65,1.975,1002,6h15,72,3h,No,Sí,2.5,1.8,1.8,1.8,,Ha desaparegut la sensació de formigueig
+24-maig,66,2,2737,7h40,78,3h,No,Sí,2.4,2,1.8,1.8,,Repòs i platja sorra
+25-maig,67,1.725,2138,7h30,86,3h,No,Sí,2,1.7,1.6,1.6,,Millors sensacions
+26-maig,68,1.725,2157,6h35,75,3h,Sí,Sí,1.9,1.9,1.5,1.6,,Millors sensacions
+27-maig,69,1.925,4178,6h45,61,2h,Sí,Sí,1.9,2.1,1.9,1.8,,Lleugera fatiga de sobrecàrrega
+28-maig,70,2.85,3570,6h50,65,2h,Sí,No,2.8,2.8,2,2,,Fatiga als peus
+29-maig,71,2.425,2367,6h39,66,2h,No,No,2.9,2.8,2,2,,Conducció viladecans: fatiga i molèsties
+30-maig,72,3.1,1780,6h45,75,2h,No,Sí,3,3.5,3.9,2,,Final de dia molt bloquejat les dos cames
+31-maig,73,2.625,2850,6h30,88,1h,No,Sí,2.5,3,3,2,,Sensacions a les dos cames i peus
+1-juny,74,2.625,4284,6h30,79,2h,No,Sí,2.3,2.8,2.5,1.9,,Lleugeres sobrecàrregues a cama i peu (BCN Esp)
+2-juny,75,2.375,2605,6h45,80,2h,Sí,Sí,2.2,2.5,2,1.8,,Millors sensacions
+3-juny,76,2.125,3855,6h,72,3h,Sí,Sí,2,2.2,1.8,1.7,,He anat a la fisio motriu / cama esquerra carregada
+4-juny,77,1.825,3103,6h06,75,2h,Sí,Sí,1.9,2.1,1.7,1.6,,Millor
+5-juny,78,1.725,4570,9h27,90,3h,Sí,No,1.8,2,1.6,1.5,,Millor
