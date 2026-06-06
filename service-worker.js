@@ -1,26 +1,37 @@
-const CACHE = 'peu-recovery-v1';
+const CACHE = 'peu-recovery-v3';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  'https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js'
 ];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).catch(()=>{}));
+  e.waitUntil(
+    caches.open(CACHE).then(c => c.addAll(ASSETS)).catch(() => {})
+  );
   self.skipWaiting();
 });
+
 self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys =>
-    Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))
-  ));
+  // Eliminar TOTES les caches antigues
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    )
+  );
   self.clients.claim();
 });
+
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  // CSV i dades: SEMPRE xarxa, mai cache
+  if (e.request.url.includes('.csv') || e.request.url.includes('spreadsheet')) {
+    e.respondWith(fetch(e.request, { cache: 'no-store' }));
+    return;
+  }
+  // Resta: xarxa primer, cache com a fallback offline
   e.respondWith(
-    fetch(e.request, { cache: 'no-store' }).catch(() =>
-      caches.match(e.request).then(r => r || caches.match('./index.html'))
-    )
+    fetch(e.request, { cache: 'no-store' })
+      .catch(() => caches.match(e.request).then(r => r || caches.match('./index.html')))
   );
 });

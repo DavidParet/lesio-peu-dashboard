@@ -381,7 +381,9 @@ table.wt{width:100%;border-collapse:collapse;font-size:12px;min-width:460px}
 // Opció A: Google Sheet publicat com CSV (Fitxer → Compartir → Publica al web → CSV)
 // AVÍS: Qualsevol persona amb la URL podrà veure les dades.
 // Per privacitat, considera afegir autenticació al hosting.
-const GOOGLE_SHEET_URL = '';  // deixa buit si no tens Google Sheet
+// Google Sheet publicat com CSV — el dashboard llegirà sempre les dades més recents
+// Per publicar: Fitxer → Compartir → Publica al web → Full 1 → CSV → Copia URL
+const GOOGLE_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1GgSeKs21vd2IqOxSs1ze6r_STL73peqQjQja_I_Pjus/pub?output=csv&cachebust=' + Date.now();
 
 // Opció B: Fitxer local al servidor (si puges el CSV amb el projecte)
 const LOCAL_CSV_PATH = './data/registre.csv';
@@ -451,12 +453,14 @@ function col(row, key) {
 function parseCSV(raw) {
   const lines = raw.replace(/\r/g,'').split('\n').filter(l => l.trim());
   if (lines.length < 2) return [];
-  const hdrs = lines[0].split(',').map(h => h.trim());
+  // Auto-detectar separador: punt-i-coma o coma
+  const sep = lines[0].includes(';') ? ';' : ',';
+  const hdrs = lines[0].split(sep).map(h => h.trim().replace(/^﻿/,''));
   return lines.slice(1).map(line => {
     const cols = []; let cur = '', inQ = false;
     for (const c of line) {
       if (c==='"') inQ = !inQ;
-      else if (c===',' && !inQ) { cols.push(cur); cur = ''; }
+      else if (c===sep && !inQ) { cols.push(cur); cur = ''; }
       else cur += c;
     }
     cols.push(cur);
