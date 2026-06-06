@@ -1,0 +1,2145 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seguiment Clínic · Peu</title>
+<style>
+:root {
+  --bg:        #0D0D0F;
+  --surface:   #18181B;
+  --surface-2: #212124;
+  --surface-3: #2A2A2E;
+  --border:    rgba(255,255,255,0.06);
+  --border-md: rgba(255,255,255,0.11);
+  --border-lg: rgba(255,255,255,0.17);
+  --text-1:    #F0EBE3;
+  --text-2:    #8A8A90;
+  --text-3:    #44444A;
+  --amber:     #F5A623;
+  --amber-bg:  rgba(245,166,35,0.12);
+  --orange:    #FF6B35;
+  --orange-bg: rgba(255,107,53,0.12);
+  --green:     #2ECC71;
+  --green-bg:  rgba(46,204,113,0.11);
+  --red:       #FF453A;
+  --red-bg:    rgba(255,69,58,0.11);
+  --blue:      #5AC8FA;
+  --blue-bg:   rgba(90,200,250,0.11);
+  --r-sm: 10px; --r: 16px; --r-lg: 22px;
+  --sh: 0 2px 16px rgba(0,0,0,0.55);
+  --sh-sm: 0 1px 6px rgba(0,0,0,0.4);
+  --sh-lg: 0 8px 32px rgba(0,0,0,0.7);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text-1);min-height:100vh;line-height:1.5;-webkit-font-smoothing:antialiased;font-feature-settings:'kern' 1,'liga' 1}
+
+/* HEADER */
+.app-hdr{position:sticky;top:0;z-index:100;background:rgba(13,13,15,0.94);backdrop-filter:blur(24px) saturate(180%);-webkit-backdrop-filter:blur(24px) saturate(180%);border-bottom:1px solid var(--border);padding:7px 16px;display:flex;align-items:center;justify-content:space-between}
+.hdr-left{display:flex;align-items:center;gap:9px}
+.hdr-dot{width:7px;height:7px;border-radius:50%;background:var(--amber);box-shadow:0 0 10px rgba(245,166,35,0.7)}
+.hdr-name{font-size:12px;font-weight:700;color:var(--text-1);letter-spacing:-0.2px}
+.hdr-sub{font-size:9px;color:var(--text-2);letter-spacing:0.1px}
+.hdr-right{display:flex;align-items:center;gap:7px}
+.hdr-date{font-size:10px;color:var(--text-2)}
+.btn-ghost{background:transparent;border:1px solid var(--border);border-radius:7px;padding:4px 10px;font-size:10px;font-weight:600;color:var(--text-2);cursor:pointer;transition:all 0.15s}
+.btn-ghost:hover{color:var(--text-1);border-color:var(--border-md);background:var(--surface)}
+.btn-amber{background:var(--amber);border:none;border-radius:8px;padding:5px 13px;font-size:11px;font-weight:700;color:#1A0F00;cursor:pointer;transition:all 0.15s}
+.btn-amber:hover{opacity:0.88}
+.btn-outline-amber{background:transparent;border:1px solid rgba(245,166,35,0.35);border-radius:7px;padding:4px 11px;font-size:10px;font-weight:600;color:var(--amber);cursor:pointer;transition:all 0.15s}
+.btn-outline-amber:hover{background:rgba(245,166,35,0.07);border-color:rgba(245,166,35,0.6)}
+.btn-pdf{background:transparent;border:1px solid var(--border);border-radius:7px;padding:4px 10px;font-size:10px;font-weight:600;color:var(--text-2);cursor:pointer;transition:all 0.15s}
+.btn-pdf:hover{color:var(--text-1);border-color:var(--border-md)}
+
+/* LAYOUT */
+.content{max-width:780px;margin:0 auto;padding:18px 14px 56px}
+.sec-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--text-3);margin:28px 0 10px 2px;display:flex;align-items:center;gap:8px}
+.sec-lbl::after{content:'';flex:1;height:1px;background:var(--border);display:block}
+
+/* HERO */
+.hero{background:linear-gradient(150deg,#141009 0%,#1C1408 40%,#170D05 70%,#120D0E 100%);border:1px solid rgba(245,166,35,0.13);border-radius:var(--r-lg);padding:24px 24px 20px;position:relative;overflow:hidden;margin-bottom:12px;box-shadow:0 4px 32px rgba(0,0,0,0.7),0 0 80px rgba(245,166,35,0.04)}
+.hero::before{content:'';position:absolute;top:-80px;right:-80px;width:280px;height:280px;background:radial-gradient(circle,rgba(245,166,35,0.13) 0%,transparent 68%);pointer-events:none}
+.hero::after{content:'';position:absolute;bottom:-60px;left:-30px;width:220px;height:220px;background:radial-gradient(circle,rgba(255,107,53,0.07) 0%,transparent 70%);pointer-events:none}
+.hero-top{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start;margin-bottom:14px}
+@media(max-width:520px){.hero-top{grid-template-columns:1fr}}
+/* Comparativa avui / ahir al hero */
+.hero-cmp{display:grid;grid-template-columns:1fr 1fr;gap:2px 10px;margin:8px 0 10px;padding:9px 11px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:9px}
+.hcmp-hdr{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-3);padding-bottom:5px;grid-column:span 1}
+.hcmp-hdr.today{color:rgba(245,166,35,0.6)}
+.hcmp-val{font-size:14px;font-weight:700;font-feature-settings:'tnum' 1;line-height:1.1;padding:2px 0 0}
+.hcmp-val.today{color:var(--text-1)}.hcmp-val.prev{color:var(--text-2)}
+.hcmp-meta{font-size:8px;color:var(--text-3);padding-bottom:5px;border-bottom:1px solid rgba(255,255,255,0.04);margin-bottom:2px}
+/* Sparkline banda a banda */
+.hero-spark-full{margin:0 0 14px;position:relative}
+.hero-spark-full canvas{display:block;width:100%!important;height:62px}
+.hero-spark-full .spark-lbl{font-size:8px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.8px;margin-top:4px;text-align:right}
+.hero-left{min-width:0}
+.hero-eyebrow{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:rgba(245,166,35,0.72);margin-bottom:8px}
+.risk-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 11px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:0.3px;margin-bottom:10px;border:1px solid}
+.risk-estable{background:rgba(46,204,113,0.12);color:var(--green);border-color:rgba(46,204,113,0.22)}
+.risk-vigilancia{background:rgba(245,166,35,0.12);color:var(--amber);border-color:rgba(245,166,35,0.22)}
+.risk-sobrecarrega{background:rgba(255,107,53,0.12);color:var(--orange);border-color:rgba(255,107,53,0.22)}
+.risk-regresio{background:rgba(255,69,58,0.12);color:var(--red);border-color:rgba(255,69,58,0.22)}
+.hero-score{font-size:60px;font-weight:800;letter-spacing:-3px;line-height:1;color:var(--amber);font-feature-settings:'tnum' 1}
+.hero-score-label{font-size:13px;color:rgba(240,235,227,0.48);font-weight:500;margin-top:5px;letter-spacing:-0.1px}
+.hero-spark{display:flex;flex-direction:column;align-items:center;gap:5px;padding-top:4px;flex-shrink:0}
+#sparkline{display:block}
+.spark-lbl{font-size:8px;color:var(--text-3);text-transform:uppercase;letter-spacing:0.8px}
+.hero-chips{display:flex;flex-direction:column;align-items:flex-end;gap:7px;padding-top:2px;flex-shrink:0}
+.hero-day-chip{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.09);border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;white-space:nowrap}
+.hero-trend-chip{border-radius:20px;padding:5px 12px;font-size:11px;font-weight:700;white-space:nowrap}
+.trend-up{background:rgba(46,204,113,0.16);color:var(--green)}
+.trend-down{background:rgba(255,69,58,0.16);color:var(--red)}
+.trend-flat{background:rgba(245,166,35,0.13);color:var(--amber)}
+.hero-ai-tag{font-size:10px;font-weight:500;letter-spacing:0.1px;color:rgba(240,235,227,0.48);margin-bottom:0;line-height:1.6;border-top:1px solid rgba(245,166,35,0.1);padding-top:11px}
+.hero-ai-tag strong{color:rgba(240,235,227,0.75);font-weight:600}
+.hero-ai-tag .tag-pos{color:var(--green)}.hero-ai-tag .tag-neg{color:var(--orange)}.hero-ai-tag .tag-key{color:rgba(245,166,35,0.8)}
+.hero-ai-tag-prev{border-top:1px solid rgba(255,255,255,0.05);padding-top:7px;margin-top:5px;color:rgba(240,235,227,0.28);font-size:9.5px}
+.hero-ai-tag-prev strong{color:rgba(240,235,227,0.42)}
+.hero-ai-tag-prev .tag-pos{color:rgba(46,204,113,0.55)}.hero-ai-tag-prev .tag-neg{color:rgba(255,107,53,0.55)}.hero-ai-tag-prev .tag-key{color:rgba(245,166,35,0.45)}
+.hero-ai-tag-lbl{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:rgba(245,166,35,0.38);margin-bottom:2px}
+.hero-msg{font-size:14px;line-height:1.75;color:rgba(240,235,227,0.7);font-weight:400;font-style:italic;border-top:1px solid rgba(245,166,35,0.1);padding-top:13px}
+.hero-msg strong{color:var(--text-1);font-weight:600;font-style:normal}
+
+/* HERO REDESIGN — RECOVERY SCORE · DATA PROTAGONISTA */
+/* Data: element principal editorial */
+.hero-date-big{font-size:clamp(34px,7vw,48px);font-weight:700;letter-spacing:-1.5px;color:var(--text-1);line-height:1;margin-bottom:5px;font-feature-settings:'kern' 1}
+/* Label "Dia 69 de recuperació" */
+.hero-dia-lbl{font-size:11px;font-weight:400;color:rgba(240,235,227,0.28);letter-spacing:-0.1px;margin-bottom:11px}
+/* Bloc 62% + label + text explicatiu */
+.hero-rec-block{display:flex;align-items:flex-start;gap:10px;margin-bottom:11px;flex-wrap:wrap}
+.hero-rec-pct{font-size:clamp(36px,6vw,52px);font-weight:800;letter-spacing:-2px;color:rgba(240,235,227,0.92);line-height:1;font-feature-settings:'tnum' 1;flex-shrink:0}
+.hero-rec-unit{font-size:22px;font-weight:500;opacity:0.75;margin-left:2px}
+.hero-rec-desc-wrap{display:flex;flex-direction:column;gap:5px;justify-content:flex-end;padding-bottom:4px;min-width:0}
+.hero-rec-desc{font-size:11px;font-weight:600;color:rgba(240,235,227,0.65);letter-spacing:-0.1px;white-space:nowrap}
+.hero-rec-base{font-size:9.5px;color:rgba(240,235,227,0.38);line-height:1.6;max-width:210px}
+/* Arc indicator col */
+.hero-arc-col{display:flex;flex-direction:column;align-items:center;justify-content:center;padding-top:6px;flex-shrink:0;gap:4px}
+.hero-arc-sub{font-size:7px;font-weight:400;text-transform:uppercase;letter-spacing:0.9px;color:var(--text-3);text-align:center}
+/* Estat monitorització */
+.hero-state-pill{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:500;color:rgba(240,235,227,0.45);letter-spacing:0.1px;margin-bottom:0}
+.hero-state-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.state-active .hero-state-dot{background:var(--green);box-shadow:0 0 7px rgba(46,204,113,0.8);animation:hsd-pulse 2.4s ease-in-out infinite}
+.state-pending .hero-state-dot{background:var(--amber)}
+.state-interrupted .hero-state-dot{background:var(--orange)}
+@keyframes hsd-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.35;transform:scale(0.75)}}
+/* Frase IA central — cor emocional del dashboard */
+.hero-ai-central{font-size:12.5px;line-height:1.7;color:rgba(240,235,227,0.58);font-weight:400;font-style:italic;margin-top:13px;border-left:1.5px solid rgba(245,166,35,0.18);padding-left:11px;max-width:260px}
+
+/* HERO VERTICAL BAR — RECOVERY SCORE */
+.hero-bar-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;padding-top:6px;flex-shrink:0}
+.hero-bar-pct{font-size:11px;font-weight:700;color:var(--amber);letter-spacing:-0.3px;font-feature-settings:'tnum' 1;min-width:28px;text-align:center}
+.hero-bar-track{width:5px;height:104px;background:rgba(255,255,255,0.05);border-radius:3px;position:relative;overflow:hidden}
+.hero-bar-fill{position:absolute;bottom:0;left:0;right:0;border-radius:3px;background:linear-gradient(to top,rgba(245,166,35,0.95),rgba(245,166,35,0.45));box-shadow:0 -2px 10px rgba(245,166,35,0.3);transition:height 1s cubic-bezier(0.34,1.2,0.64,1)}
+.hero-bar-lbl{font-size:7px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-3);writing-mode:vertical-lr;transform:rotate(180deg);white-space:nowrap}
+
+/* HERO RIGHT COL */
+.hero-right-col{display:flex;flex-direction:column;align-items:flex-end;gap:8px;padding-top:2px;flex-shrink:0}
+
+/* PREDICTION BLOCK */
+.pred-block{background:rgba(90,200,250,0.04);border:1px solid rgba(90,200,250,0.09);border-radius:10px;padding:10px 13px;margin-bottom:13px}
+.pred-lbl{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(90,200,250,0.38);margin-bottom:7px}
+.pred-items{display:flex;flex-direction:column;gap:5px}
+.pred-item{font-size:11px;color:rgba(240,235,227,0.52);line-height:1.5;display:flex;align-items:flex-start;gap:7px}
+.pred-item::before{content:'·';color:rgba(90,200,250,0.45);font-weight:900;font-size:14px;line-height:1.1;flex-shrink:0}
+
+/* METRIC GRID */
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+@media(max-width:560px){.metric-grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:561px) and (max-width:700px){.metric-grid{grid-template-columns:repeat(3,1fr)}}
+.mc{background:var(--surface);border-radius:var(--r-sm);padding:13px 13px 11px;box-shadow:var(--sh-sm);border:1px solid var(--border);border-left-width:3px;transition:transform 0.2s,box-shadow 0.2s,background 0.2s}
+.mc:hover{background:var(--surface-2);transform:translateY(-1px);box-shadow:var(--sh)}
+.mc-good{border-left-color:var(--green)!important}
+.mc-ok{border-left-color:rgba(100,200,130,0.7)!important}
+.mc-warn{border-left-color:var(--amber)!important}
+.mc-alert{border-left-color:var(--orange)!important}
+.mc-crit{border-left-color:var(--red)!important}
+.mc-info{border-left-color:var(--blue)!important}
+.mc-neut{border-left-color:var(--border-md)!important}
+.mc-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-3);margin-bottom:7px}
+.mc-value{font-size:22px;font-weight:800;line-height:1;margin-bottom:2px;font-feature-settings:'tnum' 1;letter-spacing:-0.5px}
+.mc-desc{font-size:10px;color:var(--text-2);line-height:1.4;margin-top:4px}
+.mc-prev{font-size:10px;color:rgba(240,235,227,0.35);margin-top:1px;letter-spacing:0;font-feature-settings:'tnum' 1}
+.mc-bar{height:2px;background:rgba(255,255,255,0.07);border-radius:2px;margin-top:9px;overflow:hidden}
+.mc-fill{height:100%;border-radius:2px}
+.c-good{color:var(--green)}.c-ok{color:rgba(100,200,130,0.9)}.c-warn{color:var(--amber)}.c-bad{color:var(--orange)}.c-crit{color:var(--red)}.c-neut{color:var(--text-2)}.c-blue{color:var(--blue)}
+
+/* CARD */
+.card{background:var(--surface);border-radius:var(--r);padding:18px 20px;box-shadow:var(--sh-sm);border:1px solid var(--border);margin-bottom:10px}
+.card-title{font-size:13px;font-weight:700;color:var(--text-1);margin-bottom:2px;letter-spacing:-0.2px}
+.card-sub{font-size:11px;color:var(--text-3);margin-bottom:14px}
+.card-accent{border-color:rgba(245,166,35,0.12);box-shadow:var(--sh-sm),0 0 30px rgba(245,166,35,0.03)}
+
+/* CHART UTILS */
+.chart-divider{height:1px;background:var(--border);margin:20px 0 18px}
+.chart-section-lbl{font-size:10px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:var(--text-3);margin-bottom:10px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.csl-badge{font-size:9px;padding:2px 8px;border-radius:20px;font-weight:700}
+.csl-up{background:rgba(46,204,113,0.13);color:var(--green)}
+.csl-down{background:rgba(255,69,58,0.13);color:var(--red)}
+.csl-neut{background:rgba(255,255,255,0.06);color:var(--text-2)}
+.chart-filter{display:flex;gap:6px;margin-bottom:14px}
+.cfbtn{padding:4px 12px;border-radius:20px;border:1px solid var(--border-md);background:var(--surface-2);font-size:11px;font-weight:600;color:var(--text-2);cursor:pointer;transition:all 0.15s}
+.cfbtn.on{background:var(--amber);border-color:var(--amber);color:#1A0F00}
+.cfbtn:hover:not(.on){border-color:var(--border-lg);color:var(--text-1)}
+.chart-wrap{position:relative}
+.chart-h180{height:264px}
+.chart-h200{height:272px}
+.chart-h160{height:196px}
+.chart-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;margin-bottom:2px}
+.cl-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-2)}
+.cl-line{width:18px;height:2px;border-radius:1px;flex-shrink:0}
+.cl-zone{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.week-chart-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.wcl{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--text-2)}
+.wcl-sq{width:9px;height:9px;border-radius:2px}
+
+/* CORRELACIÓ CARD */
+.card-corr{background:linear-gradient(145deg,#0F1215 0%,#141A20 100%);border-color:rgba(90,200,250,0.12);box-shadow:var(--sh-sm),0 0 40px rgba(90,200,250,0.025)}
+.corr-insight{background:rgba(90,200,250,0.07);border:1px solid rgba(90,200,250,0.13);border-radius:8px;padding:9px 13px;font-size:11px;color:rgba(90,200,250,0.78);line-height:1.65;margin-top:10px}
+.corr-insight strong{color:var(--blue);font-style:normal}
+
+/* INSIGHTS IA */
+.insights-grid{display:flex;flex-direction:column;gap:8px}
+.ins{background:var(--surface);border-radius:var(--r-sm);padding:13px 15px;box-shadow:var(--sh-sm);border:1px solid var(--border);display:flex;align-items:flex-start;gap:12px;transition:transform 0.2s,box-shadow 0.2s,background 0.2s}
+.ins:hover{background:var(--surface-2);transform:translateY(-1px);box-shadow:var(--sh)}
+.ins-icon{font-size:15px;flex-shrink:0;margin-top:1px;opacity:0.85}
+.ins-body{flex:1;min-width:0}
+.ins-title{font-size:12px;font-weight:600;color:var(--text-1);margin-bottom:3px;letter-spacing:-0.1px}
+.ins-msg{font-size:11px;color:var(--text-2);line-height:1.6}
+.ins-badge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;flex-shrink:0;letter-spacing:0.2px}
+.b-good{background:var(--green-bg);color:var(--green);border:1px solid rgba(46,204,113,0.22)}
+.b-warn{background:var(--amber-bg);color:var(--amber);border:1px solid rgba(245,166,35,0.22)}
+.b-alert{background:var(--orange-bg);color:var(--orange);border:1px solid rgba(255,107,53,0.22)}
+.b-crit{background:var(--red-bg);color:var(--red);border:1px solid rgba(255,69,58,0.22)}
+.b-info{background:var(--blue-bg);color:var(--blue);border:1px solid rgba(90,200,250,0.22)}
+.ins-ai-lbl{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:rgba(245,166,35,0.35);margin-bottom:10px}
+
+/* TIMELINE MEDIC */
+.tl-wrap{position:relative;padding-left:0}
+.tl-line{position:absolute;left:13px;top:14px;bottom:10px;width:1.5px;background:linear-gradient(to bottom,rgba(255,255,255,0.1),rgba(255,255,255,0.02))}
+.tl-item{position:relative;display:flex;align-items:flex-start;padding-bottom:16px;padding-left:36px;cursor:default}
+.tl-item:last-child{padding-bottom:0}
+.tl-dot-wrap{position:absolute;left:0;top:2px;width:27px;display:flex;justify-content:center}
+.tl-dot{width:11px;height:11px;border-radius:50%;border:2.5px solid var(--bg);flex-shrink:0;transition:filter 0.2s}
+.tl-item:hover .tl-dot{filter:brightness(1.3)}
+.tl-content{flex:1;min-width:0}
+.tl-header{display:flex;align-items:baseline;gap:8px;margin-bottom:4px;flex-wrap:wrap}
+.tl-date{font-size:10px;color:var(--text-3);font-weight:600;white-space:nowrap}
+.tl-tag{font-size:9px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--surface-2);border:1px solid;letter-spacing:0.2px;white-space:nowrap}
+.tl-txt{font-size:12px;color:var(--text-2);line-height:1.55;transition:color 0.2s}
+.tl-item:hover .tl-txt{color:var(--text-1)}
+
+/* CONTEXT */
+.ctx-trigger{display:inline-block;background:var(--amber-bg);color:var(--amber);font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:10px;letter-spacing:0.3px;border:1px solid rgba(245,166,35,0.18)}
+.ctx-obs{font-size:14px;line-height:1.75;color:var(--text-1);margin-bottom:12px}
+.ctx-ai{background:var(--surface-2);border-left:2px solid var(--amber);border-radius:0 var(--r-sm) var(--r-sm) 0;padding:11px 14px;font-size:13px;line-height:1.65;color:var(--text-2)}
+.ctx-ai-lbl{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:rgba(245,166,35,0.45);margin-bottom:4px}
+
+/* WEEK TABLE */
+.week-wrap{background:var(--surface);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh-sm);border:1px solid var(--border);margin-bottom:10px;overflow-x:auto}
+table.wt{width:100%;border-collapse:collapse;font-size:12px;min-width:460px}
+.wt th{background:var(--surface-2);padding:8px 11px;text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-3);border-bottom:1px solid var(--border);white-space:nowrap}
+.wt td{padding:9px 11px;border-bottom:1px solid var(--border)}
+.wt tr:last-child td{border-bottom:none}
+.wt tr:hover td{background:var(--surface-2)}
+.wt-score{font-weight:800;font-size:14px;font-feature-settings:'tnum' 1}
+
+/* TOLERÀNCIA ALS PASSOS */
+.tol-card{background:linear-gradient(145deg,#0D1215 0%,#101820 100%);border-color:rgba(90,200,250,0.14);box-shadow:var(--sh-sm),0 0 40px rgba(90,200,250,0.03)}
+.tol-zones{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:12px}
+@media(max-width:560px){.tol-zones{grid-template-columns:repeat(2,1fr)}}
+.tol-zone{background:var(--surface-2);border-radius:var(--r-sm);padding:10px 11px;border:1px solid var(--border);text-align:center}
+.tol-zone-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.6px;color:var(--text-3);margin-bottom:5px}
+.tol-zone-count{font-size:17px;font-weight:800;line-height:1;margin-bottom:2px}
+.tol-zone-score{font-size:10px;color:var(--text-2)}
+.tol-summary{background:rgba(90,200,250,0.07);border:1px solid rgba(90,200,250,0.13);border-radius:8px;padding:9px 13px;font-size:11px;color:rgba(90,200,250,0.78);line-height:1.65;margin-top:10px}
+.tol-summary strong{color:var(--blue);font-style:normal}
+
+/* LOADING */
+.loading-wrap{display:flex;align-items:center;justify-content:center;min-height:80vh}
+.loading-card{background:var(--surface);border-radius:var(--r-lg);padding:40px 32px;text-align:center;box-shadow:var(--sh);max-width:300px;border:1px solid var(--border)}
+.spin{width:28px;height:28px;border:2.5px solid var(--border-md);border-top-color:var(--amber);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.load-step{font-size:11px;color:var(--text-3);margin-top:6px}
+.spacer{height:24px}
+
+/* ── MÒBIL ─────────────────────────────────────────────────── */
+@media(max-width:480px){
+  .content{padding:12px 10px 48px}
+  .hero{padding:18px 16px 16px}
+  .hero-date-big{font-size:clamp(26px,8vw,38px)}
+  .hero-rec-pct{font-size:clamp(28px,7vw,40px)}
+  .hero-right-col{max-width:none!important;min-width:0!important}
+  .hero-cmp{grid-template-columns:1fr 1fr}
+  .hero-ai-central{font-size:11.5px}
+  .metric-grid{grid-template-columns:repeat(2,1fr)!important}
+  .chart-h180{height:200px}.chart-h200{height:210px}.chart-h160{height:168px}
+  .hdr-name{font-size:11px}.hdr-sub{display:none}
+  .btn-ghost,.btn-pdf{padding:3px 8px;font-size:9px}
+  .sec-lbl{font-size:8px}
+  .card{padding:14px 14px}
+  .pred-block{padding:8px 10px}
+  .tol-zones{grid-template-columns:repeat(2,1fr)!important}
+  .hero-spark-full canvas{height:50px!important}
+}
+/* PRINT / PDF */
+@media print {
+  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  body{background:#fff!important;color:#1a1a1a!important}
+  .app-hdr{display:none!important}
+  .content{max-width:100%;padding:0 8px}
+  .hero{background:#f4f1ec!important;border-color:#d4c5a9!important;box-shadow:none!important;color:#1a1a1a!important}
+  .hero::before,.hero::after{display:none}
+  .hero-score{color:#c4821a!important}
+  .hero-score-label,.hero-msg{color:#333!important}
+  .hero-msg strong{color:#1a1a1a!important}
+  .hero-day-chip{background:#e8e8e8!important;border-color:#ccc!important;color:#333!important}
+  .hero-trend-chip{background:#e8f5e9!important;color:#2e7d32!important}
+  .trend-down{background:#fdecea!important;color:#c62828!important}
+  .trend-flat{background:#fff8e1!important;color:#f57f17!important}
+  .risk-badge{background:#f0f0f0!important;color:#333!important;border-color:#ccc!important}
+  .mc{background:#f7f9fc!important;border-color:#dde3ea!important;box-shadow:none!important;border-left-width:3px!important}
+  .mc-label{color:#888!important}
+  .mc-value{color:#1a1a1a!important}
+  .mc-desc{color:#555!important}
+  .mc-bar{background:#e0e0e0!important}
+  .card,.card-accent,.card-corr{background:#f7f9fc!important;border-color:#dde3ea!important;box-shadow:none!important;break-inside:avoid}
+  .card-title{color:#1a1a1a!important}
+  .card-sub{color:#888!important}
+  .chart-divider{background:#e0e0e0!important}
+  .chart-section-lbl{color:#555!important}
+  .csl-badge{background:#e8e8e8!important;color:#555!important}
+  .sec-lbl{color:#aaa!important}
+  .sec-lbl::after{background:#e0e0e0!important}
+  .ins{background:#f7f9fc!important;border-color:#dde3ea!important;box-shadow:none!important;break-inside:avoid}
+  .ins-title{color:#1a1a1a!important}
+  .ins-msg{color:#555!important}
+  .b-good{background:#e8f5e9!important;color:#2e7d32!important;border-color:#a5d6a7!important}
+  .b-warn{background:#fff8e1!important;color:#f57f17!important;border-color:#ffe082!important}
+  .b-alert{background:#fff3e0!important;color:#e65100!important;border-color:#ffcc02!important}
+  .b-crit{background:#fdecea!important;color:#c62828!important;border-color:#ef9a9a!important}
+  .b-info{background:#e3f2fd!important;color:#1565c0!important;border-color:#90caf9!important}
+  .tl-line{background:#e0e0e0!important}
+  .tl-date{color:#888!important}
+  .tl-txt{color:#1a1a1a!important}
+  .tl-tag{background:#e8e8e8!important;color:#555!important}
+  .week-wrap{border-color:#dde3ea!important;box-shadow:none!important}
+  .wt th{background:#f0f0f0!important;color:#555!important}
+  .wt td{border-color:#dde3ea!important;color:#1a1a1a!important}
+  .wt tr:hover td{background:transparent!important}
+  .chart-filter{display:none!important}
+  .ctx-trigger{background:#fff8e1!important;color:#c4821a!important}
+  .ctx-obs{color:#1a1a1a!important}
+  .ctx-ai{background:#f4f1ec!important;border-color:#c4821a!important}
+  .ctx-ai-lbl{color:#c4821a!important}
+  .btn-ghost,.btn-amber,.btn-pdf{display:none!important}
+  canvas{max-width:100%!important}
+  .chart-wrap{break-inside:avoid}
+  .corr-insight{background:#e3f2fd!important;border-color:#90caf9!important;color:#1565c0!important}
+  .hero-spark{display:none!important}
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.js" integrity="sha384-iU8HYtnGQ8Cy4zl7gbNMOhsDTTKX02BTXptVP/vqAWIaTfM7isw76iyZCsjL2eVi" crossorigin="anonymous"></script>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0D0D0F">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Recuperació Peu">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+</head>
+<body>
+
+<div class="app-hdr">
+  <div class="hdr-left">
+    <div class="hdr-dot"></div>
+    <span class="hdr-name">Seguiment Clínic · Peu</span>
+    <span class="hdr-sub">— monitorització funcional</span>
+  </div>
+  <div class="hdr-right">
+    <span class="hdr-date" id="appDate"></span>
+    <button class="btn-ghost" onclick="location.reload()">↺ Actualitzar</button>
+    <button class="btn-pdf" id="pdfBtn" onclick="savePDF()">🖨️ PDF</button>
+    <button class="btn-outline-amber" id="fsBtn" onclick="toggleFS()">⛶ Pantalla completa</button>
+  </div>
+</div>
+
+<div id="main">
+  <div class="loading-wrap">
+    <div class="loading-card">
+      <div class="spin"></div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:4px;color:var(--text-1)">Carregant sistema clínic</div>
+      <div class="load-step" id="loadStep">Connectant amb Drive...</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════
+   CONFIG
+══════════════════════════════════════════════ */
+// ── CONFIGURACIÓ ──────────────────────────────────────────────────────────
+// Opció A: Google Sheet publicat com CSV (Fitxer → Compartir → Publica al web → CSV)
+// AVÍS: Qualsevol persona amb la URL podrà veure les dades.
+// Per privacitat, considera afegir autenticació al hosting.
+const GOOGLE_SHEET_URL = '';  // deixa buit si no tens Google Sheet
+
+// Opció B: Fitxer local al servidor (si puges el CSV amb el projecte)
+const LOCAL_CSV_PATH = './data/registre.csv';
+
+// localStorage key
+const LS_KEY = 'peu_recovery_csv';
+let ALL = [], FILTER = 30, ALL_EVENTS = [];
+let CHART_OBJ = null, CHART1_OBJ = null, CHART2_OBJ = null, CHART3_OBJ = null, CHART4_OBJ = null;
+
+/* ══════════════════════════════════════════════
+   PARSERS (INTACTES)
+══════════════════════════════════════════════ */
+const MESOS = {
+  'gen':1,'febr':2,'febre':2,'marc':3,'març':3,
+  'abr':4,'abril':4,'mai':5,'maig':5,'juny':6,
+  'jul':7,'juliol':7,'ag':8,'agost':8,
+  'set':9,'oct':10,'nov':11,'des':12,'desembre':12
+};
+const MES_NOM = {1:'Gen',2:'Feb',3:'Març',4:'Abr',5:'Maig',6:'Jun',7:'Jul',8:'Ag',9:'Set',10:'Oct',11:'Nov',12:'Des'};
+
+function b64utf8(b) {
+  const bin = atob(b), bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new TextDecoder('utf-8').decode(bytes);
+}
+function parseDateStr(v) {
+  if (!v) return null;
+  const p = v.toLowerCase().trim().split('-');
+  if (p.length < 2) return null;
+  const d = parseInt(p[0]), m = MESOS[p[1].trim()];
+  if (!m || isNaN(d)) return null;
+  const iso = `2026-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  return { iso, lbl: `${String(d).padStart(2,'0')}/${String(m).padStart(2,'0')}`, month: MES_NOM[m], m };
+}
+function pNum(v) {
+  if (!v) return null;
+  const s = String(v).trim();
+  if (!s || s==='—'||s==='–') return null;
+  const n = parseFloat(s.replace(/[?!]/g,'').replace(/\+.*/,'').trim().replace(',','.'));
+  return isNaN(n) ? null : n;
+}
+function pSteps(v) {
+  if (!v) return null;
+  const s = String(v).trim();
+  if (!s || s==='—') return null;
+  const n = parseInt(s.replace(/[?!]/g,'').replace(/\+.*/,'').replace(/bici.*/i,'').replace(/paso+s?.*/i,'').trim().replace(/\./g,'').replace(',',''));
+  return isNaN(n) ? null : n;
+}
+function pHours(v) {
+  if (!v) return null;
+  const s = String(v).trim();
+  if (!s || s==='—') return null;
+  const m = s.match(/(\d+)[h:](\d*)/i);
+  if (m) return parseInt(m[1]) + (m[2] ? parseInt(m[2])/60 : 0);
+  const n = parseFloat(s.replace(',','.'));
+  return isNaN(n) ? null : n;
+}
+function isSi(v) { return !!(v && String(v).toLowerCase().startsWith('s')); }
+function col(row, key) {
+  if (row[key] !== undefined) return row[key];
+  const kn = key.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+  for (const k of Object.keys(row)) {
+    if (k.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase() === kn) return row[k];
+  }
+  return '';
+}
+function parseCSV(raw) {
+  const lines = raw.replace(/\r/g,'').split('\n').filter(l => l.trim());
+  if (lines.length < 2) return [];
+  const hdrs = lines[0].split(',').map(h => h.trim());
+  return lines.slice(1).map(line => {
+    const cols = []; let cur = '', inQ = false;
+    for (const c of line) {
+      if (c==='"') inQ = !inQ;
+      else if (c===',' && !inQ) { cols.push(cur); cur = ''; }
+      else cur += c;
+    }
+    cols.push(cur);
+    const o = {};
+    hdrs.forEach((h,i) => { o[h] = (cols[i]||'').trim(); });
+    return o;
+  }).filter(r => r['Data'] && r['Data'].match(/-/));
+}
+function parseRows(rows) {
+  return rows.map(r => {
+    const dp = parseDateStr(col(r,'Data'));
+    return {
+      iso: dp?.iso||null, lbl: dp?.lbl||col(r,'Data').slice(0,8),
+      month: dp?.month||'?', m: dp?.m||0,
+      dia: parseInt(col(r,'Dia'))||0,
+      score: pNum(col(r,'Y numèrica')),
+      passos: pSteps(col(r,'Passos')),
+      son: pHours(col(r,'Son')),
+      qualitat: pNum(col(r,'Qualitat')),
+      magneto: pHours(col(r,'Magneto')),
+      fisio: col(r,'Fisio'), exercicis: col(r,'Exercicis'),
+      dolorM: pNum(col(r,'Dolor M')), dolorV: pNum(col(r,'Dolor V')),
+      coixesa: pNum(col(r,'Coixesa')), inflam: pNum(col(r,'Inflamació')),
+      trigger: col(r,'Trigger'), obs: col(r,'Observacions')
+    };
+  }).sort((a,b) => a.dia - b.dia);
+}
+
+/* ══════════════════════════════════════════════
+   STATS (INTACTES)
+══════════════════════════════════════════════ */
+function avg(arr) {
+  const v = arr.filter(x => x !== null && !isNaN(x));
+  return v.length ? v.reduce((a,b)=>a+b,0)/v.length : null;
+}
+function movAvg(arr, w=7) {
+  return arr.map((_,i) => {
+    const sl = arr.slice(Math.max(0,i-w+1),i+1).filter(x=>x!==null);
+    return sl.length ? sl.reduce((a,b)=>a+b,0)/sl.length : null;
+  });
+}
+function todayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function toComfort(score) { return score !== null ? 6 - score : null; }
+
+/* WEEKS */
+function computeWeeks(data) {
+  const weeks = [];
+  for (let i = 0; i < data.length; i += 7) {
+    const sl = data.slice(i, i+7);
+    weeks.push({
+      n: Math.floor(i/7)+1,
+      days: sl.map(r => r.dia),
+      lbl: `S${Math.floor(i/7)+1}`,
+      lblFull: `${sl[0]?.lbl}–${sl[sl.length-1]?.lbl}`,
+      avgSc: avg(sl.map(r=>r.score)),
+      avgDM: avg(sl.map(r=>r.dolorM)),
+      avgPas: avg(sl.map(r=>r.passos)),
+      totalPas: sl.reduce((s,r)=>s+(r.passos||0),0),
+      fisioD: sl.filter(r=>isSi(r.fisio)).length,
+      dies: sl.length
+    });
+  }
+  return weeks;
+}
+
+/* ══════════════════════════════════════════════
+   LABELS (INTACTES)
+══════════════════════════════════════════════ */
+function scoreLabel(v) {
+  if (v===null) return '—';
+  if (v<1.5) return 'Excel·lent'; if (v<2.0) return 'Molt bé';
+  if (v<2.8) return 'Acceptable'; if (v<3.5) return 'Regular';
+  if (v<4.5) return 'Difícil'; return 'Molt difícil';
+}
+function comfortLabel(c) {
+  if (c===null) return '—';
+  if (c>=4.5) return 'Excel·lent'; if (c>=4.0) return 'Molt bé';
+  if (c>=3.2) return 'Acceptable'; if (c>=2.5) return 'Regular';
+  if (c>=1.5) return 'Difícil'; return 'Molt difícil';
+}
+function scoreClass(v) {
+  if (v===null) return 'c-neut';
+  if (v<1.5) return 'c-good'; if (v<2.0) return 'c-ok';
+  if (v<2.8) return 'c-warn'; if (v<3.5) return 'c-bad';
+  return 'c-crit';
+}
+function scoreBarColor(v) {
+  if (v===null) return 'var(--border-md)';
+  if (v<1.5) return 'var(--green)'; if (v<2.5) return 'rgba(100,200,130,0.8)';
+  if (v<3.5) return 'var(--amber)'; if (v<4.5) return 'var(--orange)';
+  return 'var(--red)';
+}
+function scoreDotColor(v) {
+  if (v===null) return 'rgba(255,255,255,0.12)';
+  if (v<2) return 'var(--green)'; if (v<3) return 'rgba(100,200,130,0.9)';
+  if (v<4) return 'var(--amber)'; return 'var(--red)';
+}
+function weekBarColor(v) {
+  if (v===null) return 'rgba(100,100,100,0.3)';
+  if (v < 2.0) return 'rgba(46,204,113,0.85)';
+  if (v < 2.4) return 'rgba(120,200,80,0.85)';
+  if (v < 2.8) return 'rgba(241,196,15,0.85)';
+  if (v < 3.5) return 'rgba(230,126,34,0.85)';
+  return 'rgba(192,57,43,0.85)';
+}
+function painLabel(v) {
+  if (v===null) return '—';
+  if (v<1) return 'Sense dolor'; if (v<2) return 'Lleuger';
+  if (v<3) return 'Moderat'; if (v<4) return 'Significatiu';
+  if (v<5) return 'Intens'; return 'Molt intens';
+}
+function stepsLabel(v) {
+  if (!v) return 'No registrat';
+  if (v<800)  return 'Repòs total';
+  if (v<1800) return 'Activitat mínima';
+  if (v<3000) return 'Activitat baixa';
+  if (v<4000) return 'Activitat moderada';
+  if (v<5500) return 'Càrrega elevada';
+  return 'Càrrega intensa';
+}
+// Lògica clínica contextual: passos + dolor + inflamació + coixesa
+function stepsClinic(passos, dolorV, inflam, coixesa) {
+  if (!passos) return { lbl: 'No registrat', mcCls: 'mc-info', col: 'var(--blue)', valCls: 'c-neut' };
+  const dV = dolorV || 0, inf = inflam || 0, cx = coixesa || 0;
+  const highRisk = dV >= 2.5 || inf >= 2.5 || cx >= 2.5;
+  const modRisk  = dV >= 1.5 || inf >= 1.5 || cx >= 1.5;
+  if (passos >= 5000 && highRisk)
+    return { lbl: 'Càrrega intensa · risc de sobrecàrrega', mcCls: 'mc-crit',  col: 'var(--red)',    valCls: 'c-crit' };
+  if (passos >= 4200 && highRisk)
+    return { lbl: 'Càrrega elevada · vigilar resposta',     mcCls: 'mc-alert', col: 'var(--orange)', valCls: 'c-bad' };
+  if (passos >= 4200 && modRisk)
+    return { lbl: 'Càrrega elevada · monitoritzar',         mcCls: 'mc-warn',  col: 'var(--amber)',  valCls: 'c-warn' };
+  if (passos >= 4200)
+    return { lbl: 'Càrrega elevada · dolor controlat',      mcCls: 'mc-info',  col: 'var(--blue)',   valCls: 'c-neut' };
+  if (passos >= 3000)
+    return { lbl: 'Activitat moderada',                     mcCls: 'mc-info',  col: 'var(--blue)',   valCls: 'c-neut' };
+  if (passos >= 1800)
+    return { lbl: 'Activitat baixa',                        mcCls: 'mc-info',  col: 'var(--blue)',   valCls: 'c-neut' };
+  if (passos >= 800)
+    return { lbl: 'Activitat mínima',                       mcCls: 'mc-info',  col: 'var(--blue)',   valCls: 'c-neut' };
+  return { lbl: 'Repòs total',                              mcCls: 'mc-info',  col: 'var(--blue)',   valCls: 'c-neut' };
+}
+function sonLabel(v) {
+  if (!v) return '—';
+  if (v<5) return 'Insuficient'; if (v<6.5) return 'Curt';
+  if (v<7.5) return 'Acceptable'; if (v<9) return 'Bé';
+  return 'Molt bé';
+}
+function fmtH(h) {
+  if (!h) return '—';
+  const hh = Math.floor(h), mm = Math.round((h%1)*60);
+  return `${hh}h${mm?mm+'m':''}`;
+}
+
+/* ══════════════════════════════════════════════
+   DETECTORS (INTACTES)
+══════════════════════════════════════════════ */
+const VISIT_KW = [
+  { re: /fisioterapeuta|fisio nova|fisio (amb|sessi)/i, tag: 'Fisio', col: '#2ECC71', chartCol: 'rgba(46,204,113,0.8)' },
+  { re: /traum[aà]|dr\.?\s*ri[oó]s|dr\.?\s*jord[aà]/i, tag: 'Traumatologia', col: '#F5A623', chartCol: 'rgba(245,166,35,0.8)' },
+  { re: /infilt/i, tag: 'Infiltració', col: '#FF453A', chartCol: 'rgba(255,69,58,0.8)' },
+  { re: /rx|radiog|ecog|rm\b/i, tag: 'Prova imatge', col: '#8E8E93', chartCol: 'rgba(142,142,147,0.8)' },
+  { re: /visita|cita|metge|doctor/i, tag: 'Visita', col: '#2ECC71', chartCol: 'rgba(46,204,113,0.8)' },
+  { re: /podol/i, tag: 'Podologia', col: '#FF6B35', chartCol: 'rgba(255,107,53,0.8)' },
+];
+function detectVisits(all) {
+  const visits = [];
+  for (const r of all) {
+    const txt = (r.obs + ' ' + r.trigger).toLowerCase();
+    for (const kw of VISIT_KW) {
+      if (kw.re.test(txt)) {
+        visits.push({ lbl: r.lbl, iso: r.iso, dia: r.dia, txt: (r.obs||r.trigger||'').slice(0,90), tag: kw.tag, col: kw.col, chartCol: kw.chartCol });
+        break;
+      }
+    }
+  }
+  return visits;
+}
+function detectWorstDays(data, n=5) {
+  const peaks = [];
+  for (let i=1; i<data.length-1; i++) {
+    const sc = data[i].score;
+    if (sc===null) continue;
+    const prev = data[i-1].score, next = data[i+1].score;
+    if (prev!==null && next!==null && sc >= prev && sc >= next && sc > 3.0) {
+      peaks.push({ idx:i, score:sc, dia:data[i].dia, lbl:data[i].lbl });
+    }
+  }
+  peaks.sort((a,b) => b.score-a.score);
+  return peaks.slice(0,n).sort((a,b) => a.dia-b.dia);
+}
+
+/* ══════════════════════════════════════════════
+   RISK BADGE (NOU)
+══════════════════════════════════════════════ */
+function computeRisk(kRow, trendDelta) {
+  const sc = kRow.score;
+  if (sc === null) return { cls:'risk-estable', label:'Sense dades', icon:'·' };
+  const prev7avgPas = avg(ALL.slice(-8,-1).map(r=>r.passos));
+  const highLoad = prev7avgPas && kRow.passos && kRow.passos > prev7avgPas * 1.4;
+  const recentPeaks = detectWorstDays(ALL.slice(-10), 3);
+  if (sc >= 3.8 || (trendDelta !== null && trendDelta < -0.45))
+    return { cls:'risk-regresio', label:'Regressió', icon:'↓' };
+  if (highLoad && sc >= 2.8)
+    return { cls:'risk-sobrecarrega', label:'Sobrecàrrega', icon:'⚡' };
+  if (sc >= 2.8 || recentPeaks.length >= 2 || (trendDelta !== null && trendDelta < -0.2))
+    return { cls:'risk-vigilancia', label:'Vigilància', icon:'→' };
+  return { cls:'risk-estable', label:'Estable', icon:'↑' };
+}
+
+/* ══════════════════════════════════════════════
+   RECOVERY SCORE 0–100
+══════════════════════════════════════════════ */
+function computeRecoveryScore(kRow, trendDelta) {
+  if (kRow.score === null) return null;
+  // Dolor (0-50): component principal
+  const painComp = Math.max(0, (1 - kRow.score / 5)) * 50;
+  // Coixesa (0-15)
+  const coixComp = kRow.coixesa !== null ? Math.max(0,(1-kRow.coixesa/5))*15 : 7;
+  // Inflamació (0-10)
+  const inflamComp = kRow.inflam !== null ? Math.max(0,(1-kRow.inflam/5))*10 : 5;
+  // Passos (0-10): fins 6000 passos = màxim
+  const stepsComp = kRow.passos ? Math.min(kRow.passos/6000,1)*10 : 0;
+  // Son (0-5)
+  const sleepComp = kRow.son ? Math.min(kRow.son/8,1)*5 : 2.5;
+  // Tendència (-10 a +10)
+  const trendBonus = trendDelta !== null ? Math.max(-10,Math.min(10,trendDelta*20)) : 0;
+  // Penalització recaigudes recents
+  const recentRows = ALL.slice(-7).filter(r=>r.score!==null);
+  const peaks = recentRows.filter(r=>r.score>=3.5).length;
+  const relapsePenalty = peaks * 3;
+  return Math.round(Math.min(100,Math.max(0,
+    painComp + coixComp + inflamComp + stepsComp + sleepComp + trendBonus - relapsePenalty
+  )));
+}
+
+/* ══════════════════════════════════════════════
+   ESTAT MONITORITZACIÓ
+══════════════════════════════════════════════ */
+function getMonitoringState(kRow, today) {
+  if (!kRow.iso) return { label: 'Seguiment actiu', cls: 'state-active' };
+  if (kRow.iso === today) return { label: 'Monitorització activa', cls: 'state-active' };
+  // Compara hores des del darrer registre (assumim entrada a les 20h)
+  const lastDate = new Date(kRow.iso + 'T20:00:00');
+  const now = new Date();
+  const diffH = (now - lastDate) / (1000 * 60 * 60);
+  // Dins de les primeres 16h (matí següent): seguiment actiu, registre previst al vespre
+  if (diffH < 16) return { label: 'Registre previst al vespre', cls: 'state-active' };
+  // 16-28h: entrada pendent (probablement han passat 24h)
+  if (diffH < 28) return { label: 'Dades del dia anterior', cls: 'state-active' };
+  // 28-60h: realment pendent
+  if (diffH < 60) return { label: 'Entrada pendent', cls: 'state-pending' };
+  return { label: 'Seguiment interromput', cls: 'state-interrupted' };
+}
+
+/* ══════════════════════════════════════════════
+   SPARKLINE (NOU)
+══════════════════════════════════════════════ */
+function drawSparkline() {
+  const canvas = document.getElementById('sparkline');
+  if (!canvas) return;
+  const data = ALL.slice(-14).filter(r => r.score !== null);
+  if (data.length < 3) return;
+  const W = canvas.offsetWidth || 640;
+  const H = 62;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  const vals = data.map(r => r.score);
+  const minV = Math.min(...vals) - 0.15;
+  const maxV = Math.max(...vals) + 0.15;
+  const range = maxV - minV || 0.5;
+  const pts = vals.map((v, i) => ({
+    x: 4 + (i / (vals.length - 1)) * (W - 8),
+    y: H - 5 - ((v - minV) / range) * (H - 10)
+  }));
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, 'rgba(245,166,35,0.25)');
+  grad.addColorStop(1, 'rgba(245,166,35,0.01)');
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length; i++) {
+    const cpx = (pts[i-1].x + pts[i].x) / 2;
+    ctx.bezierCurveTo(cpx, pts[i-1].y, cpx, pts[i].y, pts[i].x, pts[i].y);
+  }
+  ctx.lineTo(pts[pts.length-1].x, H);
+  ctx.lineTo(pts[0].x, H);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+  // Line amb glow premium
+  ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length; i++) {
+    const cpx = (pts[i-1].x + pts[i].x) / 2;
+    ctx.bezierCurveTo(cpx, pts[i-1].y, cpx, pts[i].y, pts[i].x, pts[i].y);
+  }
+  ctx.strokeStyle = 'rgba(245,166,35,0.85)';
+  ctx.lineWidth = 2.2;
+  ctx.shadowBlur = 8;
+  ctx.shadowColor = 'rgba(245,166,35,0.45)';
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+  ctx.shadowColor = 'transparent';
+  // Trend dashed line
+  if (pts.length >= 5) {
+    const firstAvg = avg(vals.slice(0, 3));
+    const lastAvg = avg(vals.slice(-3));
+    const tColor = lastAvg < firstAvg ? 'rgba(46,204,113,0.4)' : 'rgba(255,69,58,0.4)';
+    const y1 = H - 5 - ((firstAvg - minV) / range) * (H - 10);
+    const y2 = H - 5 - ((lastAvg - minV) / range) * (H - 10);
+    ctx.beginPath();
+    ctx.moveTo(pts[0].x, y1);
+    ctx.lineTo(pts[pts.length-1].x, y2);
+    ctx.strokeStyle = tColor;
+    ctx.lineWidth = 1;
+    ctx.setLineDash([3, 2]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  // Last dot
+  const last = pts[pts.length-1];
+  ctx.beginPath();
+  ctx.arc(last.x, last.y, 2.5, 0, Math.PI * 2);
+  ctx.fillStyle = '#F5A623';
+  ctx.fill();
+}
+
+/* ══════════════════════════════════════════════
+   CHART PLUGINS (INTACTES)
+══════════════════════════════════════════════ */
+function makeEventsPlugin(id, eventsRef, labelsRef, showLabel=true) {
+  return {
+    id,
+    afterDraw(chart) {
+      const evs = eventsRef();
+      if (!evs.length) return;
+      const lbls = labelsRef();
+      const { ctx:c, chartArea, scales } = chart;
+      if (!chartArea || !scales.x) return;
+      c.save();
+      c.setLineDash([4,3]); c.lineWidth = 1.5;
+      for (const ev of evs) {
+        const idx = lbls.indexOf(ev.lbl);
+        if (idx < 0) continue;
+        const x = scales.x.getPixelForTick(idx);
+        if (x === undefined) continue;
+        c.strokeStyle = ev.chartCol; c.globalAlpha = 0.6;
+        c.beginPath(); c.moveTo(x, chartArea.top); c.lineTo(x, chartArea.bottom); c.stroke();
+        if (showLabel) {
+          c.globalAlpha = 0.8; c.setLineDash([]);
+          c.font = 'bold 8px -apple-system,sans-serif'; c.fillStyle = ev.chartCol;
+          c.save(); c.translate(x-3, chartArea.top+6); c.rotate(-Math.PI/2);
+          c.fillText(ev.tag.slice(0,11), 0, 0); c.restore();
+          c.setLineDash([4,3]);
+        }
+      }
+      c.restore();
+    }
+  };
+}
+
+const painZonesPlugin = {
+  id: 'painZones',
+  beforeDraw(chart) {
+    const { ctx:c, chartArea, scales } = chart;
+    if (!chartArea || !scales.y) return;
+    const { left, right } = chartArea;
+    const zones = [
+      { yMin:4, yMax:5, color:'rgba(192,57,43,0.20)' },
+      { yMin:3, yMax:4, color:'rgba(230,126,34,0.16)' },
+      { yMin:2, yMax:3, color:'rgba(241,196,15,0.12)' },
+      { yMin:1, yMax:2, color:'rgba(120,200,80,0.12)' },
+      { yMin:0, yMax:1, color:'rgba(46,204,113,0.20)' },
+    ];
+    c.save();
+    for (const z of zones) {
+      const yTop = scales.y.getPixelForValue(Math.min(z.yMax,5));
+      const yBot = scales.y.getPixelForValue(Math.max(z.yMin,0));
+      c.fillStyle = z.color;
+      c.fillRect(left, yTop, right-left, yBot-yTop);
+    }
+    c.restore();
+  }
+};
+
+const comfortZonesPlugin = {
+  id: 'comfortZones',
+  beforeDraw(chart) {
+    const { ctx:c, chartArea, scales } = chart;
+    if (!chartArea || !scales.y) return;
+    const { left, right } = chartArea;
+    const zones = [
+      { yMin:5, yMax:6, color:'rgba(30,80,50,0.36)' },
+      { yMin:4, yMax:5, color:'rgba(20,70,40,0.22)' },
+      { yMin:3, yMax:4, color:'rgba(80,65,10,0.20)' },
+      { yMin:2, yMax:3, color:'rgba(100,45,10,0.20)' },
+      { yMin:0, yMax:2, color:'rgba(100,20,20,0.22)' },
+    ];
+    c.save();
+    for (const z of zones) {
+      const yTop = scales.y.getPixelForValue(Math.min(z.yMax,6));
+      const yBot = scales.y.getPixelForValue(Math.max(z.yMin,0));
+      c.fillStyle = z.color;
+      c.fillRect(left, yTop, right-left, yBot-yTop);
+    }
+    c.restore();
+  }
+};
+
+function makeWorstPlugin(dataRef, labelsRef) {
+  return {
+    id: 'worstDays',
+    afterDraw(chart) {
+      const fd = dataRef(), lbls = labelsRef();
+      const worst = detectWorstDays(fd, 5);
+      if (!worst.length) return;
+      const { ctx:c, chartArea, scales } = chart;
+      if (!chartArea || !scales.x || !scales.y) return;
+      c.save();
+      worst.forEach((wp, ni) => {
+        const idx = fd.findIndex(r => r.dia === wp.dia);
+        if (idx < 0) return;
+        const x = scales.x.getPixelForTick(idx);
+        const y = scales.y.getPixelForValue(wp.score);
+        if (x === undefined || y === undefined) return;
+        c.beginPath(); c.arc(x, y, 7, 0, Math.PI*2);
+        c.fillStyle = 'rgba(255,69,58,0.82)'; c.fill();
+        c.strokeStyle = 'rgba(255,255,255,0.2)'; c.lineWidth=1; c.stroke();
+        c.font = 'bold 9px -apple-system,sans-serif';
+        c.fillStyle = '#FFF'; c.textAlign='center'; c.textBaseline='middle';
+        c.fillText(String(ni+1), x, y);
+      });
+      c.restore();
+    }
+  };
+}
+
+const baselineS4Plugin = {
+  id: 'baselineS4',
+  afterDraw(chart) {
+    const { ctx:c, chartArea, scales } = chart;
+    if (!chartArea || !scales.y) return;
+    const y = scales.y.getPixelForValue(2.38);
+    if (y < chartArea.top || y > chartArea.bottom) return;
+    c.save();
+    c.strokeStyle = '#2980b9'; c.lineWidth=1.5;
+    c.setLineDash([6,3]); c.globalAlpha=0.55;
+    c.beginPath(); c.moveTo(chartArea.left,y); c.lineTo(chartArea.right,y); c.stroke();
+    c.setLineDash([]); c.globalAlpha=0.8;
+    c.font = 'bold 8px -apple-system,sans-serif'; c.fillStyle='#2980b9';
+    c.fillText('★ S4 baseline 2.38 (Dr. Ríos)', chartArea.left+6, y-4);
+    c.restore();
+  }
+};
+
+function makeValueLabelsPlugin(weeksRef) {
+  return {
+    id: 'valueLabels',
+    afterDatasetsDraw(chart) {
+      const weeks = weeksRef();
+      const { ctx:c } = chart;
+      const meta = chart.getDatasetMeta(0);
+      meta.data.forEach((bar, i) => {
+        const val = chart.data.datasets[0].data[i];
+        if (val === null) return;
+        c.save();
+        c.font = 'bold 11px -apple-system,sans-serif';
+        c.fillStyle = val >= 3.5 ? '#FF6B6B' : val >= 2.8 ? '#F5A623' : '#F0EBE3';
+        c.textAlign='center'; c.textBaseline='bottom';
+        c.fillText(val.toFixed(2), bar.x, bar.y - 2);
+        const w = weeks[i];
+        if (w && w.totalPas && bar.height > 18) {
+          c.font = '8px -apple-system,sans-serif';
+          c.fillStyle = 'rgba(255,255,255,0.65)';
+          c.textBaseline='middle';
+          c.fillText(`~${(w.totalPas/1000).toFixed(0)}k`, bar.x, bar.y + bar.height/2);
+        }
+        c.restore();
+      });
+    }
+  };
+}
+
+/* ══════════════════════════════════════════════
+   HTML BUILDERS
+══════════════════════════════════════════════ */
+/* Resum clínic narratiu: evolució dolor + lectura de passos */
+function buildClinicTag(kRow, prevH, trendDelta) {
+  const sc = kRow.score;
+  const prevSc = prevH ? prevH.score : null;
+  const pas = kRow.passos || 0;
+  const pasK = pas >= 1000 ? `${(pas/1000).toFixed(1)}k` : (pas ? `${pas}` : null);
+  const prevPas = prevH ? (prevH.passos || 0) : 0;
+  const scDelta = (sc !== null && prevSc !== null) ? +(sc - prevSc).toFixed(2) : null;
+
+  // Si no tenim comparativa
+  if (scDelta === null) {
+    return `◈ Dolor Y ${sc !== null ? sc.toFixed(2) : '—'}/5 · ${scoreLabel(sc)}`;
+  }
+
+  // Part 1: evolució del dolor
+  let trendPart, trendTag;
+  if (scDelta < -0.15) {
+    trendPart = `↓ <strong>−${Math.abs(scDelta)}</strong> vs ahir`;
+    trendTag  = `<span class="tag-pos">millora</span>`;
+  } else if (scDelta > 0.3) {
+    trendPart = `↑ <strong>+${scDelta}</strong> vs ahir`;
+    trendTag  = `<span class="tag-neg">regressió</span>`;
+  } else if (scDelta > 0.05) {
+    trendPart = `↑ <strong>+${scDelta}</strong> vs ahir`;
+    trendTag  = `<span class="tag-neg">lleu empitjorament</span>`;
+  } else {
+    trendPart = `→ dolor <strong>estable</strong> vs ahir`;
+    trendTag  = '';
+  }
+
+  // Part 2: lectura de passos + resposta al dolor (el patró clínic clau)
+  let pasPart = '';
+  if (pasK) {
+    const highLoad = pas >= 4000;
+    const veryHighLoad = pas >= 5500;
+    const containedResponse = scDelta < 0.25; // dolor no dispara malgrat l'activitat
+    const goodTolerance = highLoad && containedResponse;
+    const overload = highLoad && scDelta > 0.35;
+    const prevHighLoad = prevPas >= 4000;
+
+    if (veryHighLoad && containedResponse) {
+      pasPart = ` · <span class="tag-key">${pasK} passos</span> amb resposta de dolor continguda → <span class="tag-pos">tolerància funcional alta</span>`;
+    } else if (goodTolerance) {
+      pasPart = ` · <span class="tag-key">${pasK} passos</span> amb increment mínim de dolor → <span class="tag-pos">bona tolerància funcional</span>`;
+    } else if (overload) {
+      pasPart = ` · <span class="tag-key">${pasK} passos</span> → <span class="tag-neg">possible sobrecàrrega, revisar càrrega</span>`;
+    } else if (highLoad) {
+      pasPart = ` · <span class="tag-key">${pasK} passos</span>`;
+    } else if (pasK) {
+      pasPart = ` · ${pasK} passos`;
+    }
+  }
+
+  // Part 3: tendència 7d si rellevant
+  let trend7Part = '';
+  if (trendDelta !== null && Math.abs(trendDelta) > 0.2) {
+    trend7Part = trendDelta > 0
+      ? ` · tendència 7d: <span class="tag-pos">millora sostinguda</span>`
+      : ` · tendència 7d: <span class="tag-neg">vigilar regressions</span>`;
+  }
+
+  return `◈ ${trendPart}${trendTag ? ' · ' + trendTag : ''}${pasPart}${trend7Part}`;
+}
+
+function buildHero(kRow, trendDelta, avg7, aiMsg, risk, recScore, monState, prediction, aiCentral) {
+  const sc = kRow.score;
+
+  // Trend chip: avui vs AHIR exacte (no mitjana 7d)
+  // Score 0–5: menor = millor. Si avui < ahir → dolor baixa → millora (verd)
+  const kIdxH = ALL.findIndex(r => r.dia === kRow.dia);
+  const prevH     = kIdxH > 0 ? ALL[kIdxH - 1] : null;
+  const prevPrevH = kIdxH > 1 ? ALL[kIdxH - 2] : null;
+  let trendTxt, trendCls;
+  if (prevH && prevH.score !== null && sc !== null) {
+    const d = +(sc - prevH.score).toFixed(2);
+    if (d < -0.1) {
+      trendCls = 'trend-up';
+      trendTxt = `↓ −${Math.abs(d)} vs ahir`;
+    } else if (d > 0.4) {
+      trendCls = 'trend-down';
+      trendTxt = `↑ +${d} vs ahir`;
+    } else if (d > 0.1) {
+      trendCls = 'trend-flat';
+      trendTxt = `↑ +${d} vs ahir`;
+    } else {
+      trendCls = 'trend-flat';
+      trendTxt = `→ Similar a ahir`;
+    }
+  } else {
+    trendCls = 'trend-flat';
+    trendTxt = trendDelta !== null
+      ? (trendDelta > 0.15 ? `7d ↓ millora` : trendDelta < -0.15 ? `7d ↑ empitjora` : `→ Estable`)
+      : '→ Sense dades';
+  }
+  const msgHtml = aiMsg
+    ? aiMsg.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    : `Dolor Y (escala 0–5, on 0 = sense dolor): <strong>${sc?.toFixed(2)||'—'}</strong> · ${scoreLabel(sc)}. El ${recScore!==null?recScore+'%':'—'} de recuperació funcional integra dolor, activitat física i evolució clínica.</span>`;
+
+  // Data: protagonista visual principal
+  const d = kRow.iso ? new Date(kRow.iso + 'T12:00:00') : null;
+  const dateDisplay = d
+    ? `${d.getDate()} DE ${d.toLocaleDateString('ca-ES',{month:'long'}).toUpperCase()}`
+    : '';
+
+  // Frase IA central — prioritza evolució avui vs ahir (no etiqueta estàtica del valor actual)
+  const centralFallback = (() => {
+    if (sc === null) return 'La recuperació avança pas a pas.';
+    const prevSc = prevH ? prevH.score : null;
+    const scDelta = (prevSc !== null) ? +(sc - prevSc).toFixed(2) : null;
+    const prevWasHigh = prevSc !== null && prevSc >= 3.0;
+    const prevWasMod  = prevSc !== null && prevSc >= 2.2;
+
+    // Post-episodi agut: ahir va punxar, avui millora
+    if (scDelta !== null && scDelta < -0.3 && prevWasHigh)
+      return 'Recuperació progressiva després d\'un episodi d\'alta intensitat. La simptomatologia millora respecte ahir, tot i que el procés segueix actiu.';
+    if (scDelta !== null && scDelta < -0.15 && prevWasMod)
+      return 'Millora clara respecte ahir. La recuperació avança, tot i que el cos encara processa l\'episodi anterior.';
+    // Millora lleugera
+    if (scDelta !== null && scDelta < -0.05)
+      return 'Lleugera millora respecte ahir. La tendència és positiva, la constància terapèutica és clau.';
+    // Regressió
+    if (scDelta !== null && scDelta > 0.4)
+      return 'Increment de dolor respecte ahir. Revisar l\'activitat recent i els factors desencadenants.';
+    if (scDelta !== null && scDelta > 0.15)
+      return 'Lleugera regressió respecte ahir. Mantenir el pla terapèutic i vigilar la càrrega.';
+    // Estable — ara per nivell actual
+    if (sc < 1.8) return 'El dolor es manté en nivells molt controlats. Bon moment per consolidar progressos.';
+    if (sc < 2.5) return 'La recuperació avança amb constància i sense senyals d\'alerta.';
+    if (sc < 3.5) return 'Estabilitat clínica. Seguir el pla de fisioteràpia i monitoritzar la resposta a la càrrega.';
+    return 'El dolor persisteix. Prioritzar repòs i seguiment del pla terapèutic.';
+  })();
+  const centralHtml = `<div class="hero-ai-central">${aiCentral || centralFallback}</div>`;
+
+  // Arc SVG — indicador funcional orientatiu (subtil, clínic)
+  const R = 22, C = +(2 * Math.PI * R).toFixed(2);
+  const arcLen = recScore !== null ? +((recScore/100)*C).toFixed(2) : 0;
+  const arcSvg = recScore !== null ? [
+    '<svg viewBox="0 0 56 56" width="52" height="52" style="display:block">',
+    `<circle cx="28" cy="28" r="${R}" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="2"/>`,
+    `<circle cx="28" cy="28" r="${R}" fill="none" stroke="rgba(245,166,35,0.5)" stroke-width="2"`,
+    ` stroke-dasharray="${arcLen} ${+(C-arcLen).toFixed(2)}"`,
+    ` stroke-linecap="round" transform="rotate(-90 28 28)"/>`,
+    `<text x="28" y="32" text-anchor="middle" fill="rgba(240,235,227,0.6)"`,
+    ` font-size="10" font-weight="600" font-family="-apple-system,sans-serif">${recScore}</text>`,
+    '</svg>'
+  ].join('') : '';
+
+  // Predicció IA
+  const predHtml = prediction && prediction.length
+    ? '<div class="pred-block"><div class="pred-lbl">◈ Predicció IA · si es manté la tendència</div><div class="pred-items">'
+      + prediction.map(p=>'<div class="pred-item">'+p+'</div>').join('')
+      + '</div></div>'
+    : '';
+
+  const heroHtml = [
+    '<div class="hero">',
+    '<div class="hero-top">',
+    // ── Columna esquerra: data + percentatge funcional
+    '<div class="hero-left">',
+    '<div class="hero-eyebrow">Recuperació funcional del peu</div>',
+    `<div class="hero-date-big">${dateDisplay}</div>`,
+    `<div class="hero-dia-lbl">Dia ${kRow.dia||'—'} de recuperació</div>`,
+    '<div class="hero-rec-block">',
+    `<span class="hero-rec-pct">${recScore!==null?recScore:'—'}<span class="hero-rec-unit">%</span></span>`,
+    '<div class="hero-rec-desc-wrap">',
+    `<div class="hero-rec-desc">Índex Funcional</div>`,
+    `<div class="hero-rec-base">Dolor · coixesa · inflamació · activitat · tendència · recaigudes.<br><em style="font-size:8px;opacity:0.7">Indicador orientatiu, no diagnòstic mèdic.</em></div>`,
+    '</div></div>',
+    '</div>',
+    // ── Columna dreta: estat + comparativa avui/ahir + frase + badge
+    '<div class="hero-right-col" style="align-items:flex-start;justify-content:space-between;min-width:170px;max-width:210px">',
+    `<div class="hero-state-pill ${monState.cls}" style="margin-bottom:8px"><div class="hero-state-dot"></div>${monState.label}</div>`,
+    // Comparativa AVUI | AHIR
+    (() => {
+      if (!prevH) return '';
+      const fP = v => v != null ? (v/1000 >= 1 ? (v/1000).toFixed(1)+'k' : v) : '—';
+      const avuiSc  = sc !== null ? sc.toFixed(1) : '—';
+      const ahirSc  = prevH.score !== null ? prevH.score.toFixed(1) : '—';
+      const avuiPas = fP(kRow.passos);
+      const ahirPas = fP(prevH.passos);
+      return [
+        '<div class="hero-cmp">',
+        '<div class="hcmp-hdr today">Avui</div><div class="hcmp-hdr">Ahir</div>',
+        `<div class="hcmp-val today">${avuiSc}</div><div class="hcmp-val prev">${ahirSc}</div>`,
+        '<div class="hcmp-meta">dolor /5</div><div class="hcmp-meta"></div>',
+        `<div class="hcmp-val today">${avuiPas}</div><div class="hcmp-val prev">${ahirPas}</div>`,
+        '<div class="hcmp-meta">passos</div><div class="hcmp-meta"></div>',
+        '</div>'
+      ].join('');
+    })(),
+    `<div class="hero-ai-central" style="margin-top:0;max-width:200px">${aiCentral || centralFallback}</div>`,
+    '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;margin-top:12px;width:100%">',
+    `<span class="risk-badge ${risk.cls}">${risk.icon} ${risk.label}</span>`,
+    `<div class="hero-trend-chip ${trendCls}">${trendTxt}</div>`,
+    '</div></div>',
+    '</div>',
+    // ── Sparkline banda a banda — sota el header
+    '<div class="hero-spark-full">',
+    '<canvas id="sparkline" style="width:100%;display:block;height:62px"></canvas>',
+    '<div class="spark-lbl">Evolució dolor Y (0–5) · 14 dies · ↓ millor</div>',
+    '</div>',
+    predHtml,
+    '<div class="hero-ai-tag-lbl">◈ Avui</div>',
+    `<div class="hero-ai-tag">${buildClinicTag(kRow, prevH, trendDelta)}</div>`,
+    prevH ? [
+      '<div class="hero-ai-tag-lbl" style="margin-top:6px">◈ Ahir</div>',
+      `<div class="hero-ai-tag hero-ai-tag-prev">${buildClinicTag(prevH, prevPrevH, trendDelta)}</div>`
+    ].join('') : '',
+    '</div>'
+  ].join('');
+  return heroHtml;
+}
+
+function mcColorClass(val, type) {
+  if (type === 'steps') {
+    return 'mc-info'; // passos: sempre blau/neutre — mètrica informativa, no valorativa
+  }
+  if (type === 'son') {
+    if (!val) return 'mc-info';
+    if (val >= 7.5) return 'mc-good';
+    if (val >= 6.5) return 'mc-ok';
+    if (val >= 5) return 'mc-warn';
+    return 'mc-alert';
+  }
+  if (type === 'bool') return val ? 'mc-good' : 'mc-neut';
+  if (type === 'magneto') return 'mc-info';
+  if (val === null) return 'mc-neut';
+  if (val < 1.5) return 'mc-good';
+  if (val < 2.5) return 'mc-ok';
+  if (val < 3.5) return 'mc-warn';
+  if (val < 4.5) return 'mc-alert';
+  return 'mc-crit';
+}
+
+function buildMetrics(kRow) {
+  // Dia anterior per tendència passos
+  const kIdx = ALL.findIndex(r => r.dia === kRow.dia);
+  const prev = kIdx > 0 ? ALL[kIdx - 1] : null;
+
+  // Passos: avaluació clínica contextual (dolor V + inflamació + coixesa)
+  const sc_pas = stepsClinic(kRow.passos, kRow.dolorV, kRow.inflam, kRow.coixesa);
+  let stepsDesc = sc_pas.lbl;
+  if (kRow.passos !== null && prev && prev.passos !== null) {
+    const diff = kRow.passos - prev.passos;
+    const pct = Math.abs(Math.round((diff / prev.passos) * 100));
+    if (diff > 150)       stepsDesc = `↑ +${pct}% vs ahir · ${sc_pas.lbl}`;
+    else if (diff < -150) stepsDesc = `↓ −${pct}% vs ahir · ${sc_pas.lbl}`;
+    else                  stepsDesc = `→ Similar a ahir · ${sc_pas.lbl}`;
+  }
+
+  // Coixesa: descripció de la marxa
+  const coixesaDesc = kRow.coixesa !== null
+    ? (kRow.coixesa < 0.5 ? 'Marxa normal' : kRow.coixesa < 1 ? 'Molt lleu' : kRow.coixesa < 2 ? 'Lleugera' : kRow.coixesa < 3 ? 'Moderada' : 'Marcada')
+    : '—';
+
+  // Teràpia (fisio + exercicis combinats → allibera 1 targeta per dolor M/V)
+  const terapiaVal = isSi(kRow.fisio) ? 'Fisio ✓' : (kRow.fisio && kRow.fisio !== '—' ? 'Parcial' : 'No');
+  const terapiaDesc = isSi(kRow.exercicis) ? 'Exercicis completats' : 'Sense exercicis';
+  const terapiaPct = (isSi(kRow.fisio) ? 50 : 0) + (isSi(kRow.exercicis) ? 50 : 0);
+
+  // Valors dia anterior per a cada mètrica
+  const p = prev; // alias curt
+  const fmtPas = v => v != null ? (v >= 1000 ? (v/1000).toFixed(1)+'k' : v) : null;
+
+  const cards = [
+    { lbl:'Dolor matí',   val:kRow.dolorM!==null?kRow.dolorM.toFixed(1):'—',  prevTxt:p&&p.dolorM!==null?`ahir ${p.dolorM.toFixed(1)}`:null, desc:painLabel(kRow.dolorM),  pct:kRow.dolorM!==null?(kRow.dolorM/5)*100:0,  col:scoreBarColor(kRow.dolorM),  cls:scoreClass(kRow.dolorM),  mcCls:mcColorClass(kRow.dolorM,null) },
+    { lbl:'Dolor vespre', val:kRow.dolorV!==null?kRow.dolorV.toFixed(1):'—',  prevTxt:p&&p.dolorV!==null?`ahir ${p.dolorV.toFixed(1)}`:null, desc:painLabel(kRow.dolorV),  pct:kRow.dolorV!==null?(kRow.dolorV/5)*100:0,  col:scoreBarColor(kRow.dolorV),  cls:scoreClass(kRow.dolorV),  mcCls:mcColorClass(kRow.dolorV,null) },
+    { lbl:'Coixesa',      val:kRow.coixesa!==null?kRow.coixesa.toFixed(1):'—', prevTxt:p&&p.coixesa!==null?`ahir ${p.coixesa.toFixed(1)}`:null, desc:coixesaDesc, pct:kRow.coixesa!==null?(kRow.coixesa/5)*100:0, col:scoreBarColor(kRow.coixesa), cls:scoreClass(kRow.coixesa), mcCls:mcColorClass(kRow.coixesa,null) },
+    { lbl:'Passos',       val:kRow.passos!==null?(kRow.passos>=1000?(kRow.passos/1000).toFixed(1)+'k':kRow.passos):'—', prevTxt:p&&p.passos!=null?`ahir ${fmtPas(p.passos)}`:null, desc:stepsDesc, pct:kRow.passos!==null?Math.min(100,(kRow.passos/6000)*100):0, col:sc_pas.col, cls:sc_pas.valCls, mcCls:sc_pas.mcCls },
+    { lbl:'Inflamació',   val:kRow.inflam!==null?kRow.inflam.toFixed(1):'—',   prevTxt:p&&p.inflam!==null?`ahir ${p.inflam.toFixed(1)}`:null, desc:kRow.inflam!==null?(kRow.inflam<1?'Cap':kRow.inflam<2?'Mínima':kRow.inflam<3?'Lleugera':kRow.inflam<4?'Moderada':'Alta'):'—', pct:kRow.inflam!==null?(kRow.inflam/5)*100:0, col:'var(--orange)', cls:kRow.inflam!==null?(kRow.inflam<2?'c-good':kRow.inflam<3?'c-warn':'c-bad'):'c-neut', mcCls:mcColorClass(kRow.inflam,null) },
+    { lbl:'Son',          val:fmtH(kRow.son),    prevTxt:p&&p.son!=null?`ahir ${fmtH(p.son)}`:null, desc:sonLabel(kRow.son)+(kRow.qualitat!==null?` · qualitat ${kRow.qualitat}%`:''), pct:kRow.son!==null?Math.min(100,(kRow.son/9)*100):0, col:'var(--blue)', cls:'c-blue', mcCls:mcColorClass(kRow.son,'son') },
+    { lbl:'Magneto',      val:fmtH(kRow.magneto), prevTxt:p&&p.magneto!=null?`ahir ${fmtH(p.magneto)}`:null, desc:'Magnetoteràpia', pct:kRow.magneto!==null?Math.min(100,(kRow.magneto/3)*100):0, col:'var(--blue)', cls:'c-blue', mcCls:'mc-info' },
+    { lbl:'Teràpia',      val:terapiaVal, prevTxt:null, desc:terapiaDesc, pct:terapiaPct, col:'var(--green)', cls:isSi(kRow.fisio)?'c-good':'c-neut', mcCls:(isSi(kRow.fisio)||isSi(kRow.exercicis))?'mc-good':'mc-neut' }
+  ];
+  return `<div class="metric-grid">${cards.map(c=>`
+    <div class="mc ${c.mcCls}">
+      <div class="mc-label">${c.lbl}</div>
+      <div class="mc-value ${c.cls}">${c.val}</div>
+      ${c.prevTxt ? `<div class="mc-prev">${c.prevTxt}</div>` : ''}
+      <div class="mc-desc">${c.desc}</div>
+      <div class="mc-bar"><div class="mc-fill" style="width:${c.pct}%;background:${c.col}"></div></div>
+    </div>`).join('')}</div>`;
+}
+
+function buildContext(kRow, aiContext) {
+  const hasTrigger = kRow.trigger && kRow.trigger!=='—' && kRow.trigger!=='';
+  const hasObs = kRow.obs && kRow.obs!=='—' && kRow.obs!=='';
+  if (!hasTrigger && !hasObs && !aiContext) return '';
+  return `<div class="card">
+    <div class="card-title">Context del dia</div>
+    <div class="card-sub">Observacions i estat emocional</div>
+    ${hasTrigger?`<span class="ctx-trigger">${kRow.trigger}</span>`:''}
+    ${hasObs?`<div class="ctx-obs">${kRow.obs}</div>`:''}
+    ${aiContext?`<div class="ctx-ai"><div class="ctx-ai-lbl">Interpretació</div>${aiContext}</div>`:''}
+  </div>`;
+}
+
+/* ── CORRELACIÓ CÀRREGA/DOLOR (PROTAGONISTA - POSICIÓ #1) ── */
+function buildCorrelacio() {
+  const highDays = ALL.filter(r => r.passos > 3500 && r.score !== null);
+  const lowDays = ALL.filter(r => r.passos !== null && r.passos < 2500 && r.score !== null);
+  let corrHtml = '';
+  if (highDays.length >= 3 && lowDays.length >= 3) {
+    const avgH = avg(highDays.map(r=>r.score));
+    const avgL = avg(lowDays.map(r=>r.score));
+    const diff = avgH - avgL;
+    const txt = diff > 0.3
+      ? `Patró detectat: dies amb >3.500 passos mostren un score mig de <strong>${avgH.toFixed(2)}</strong> vs <strong>${avgL.toFixed(2)}</strong> en dies de baixa càrrega. La sobrecàrrega funcional s'associa a major intensitat de dolor.`
+      : diff < -0.1
+      ? `Tolerància funcional positiva: dies d'alta activitat (>3.500 passos) no s'associen a major dolor (score ${avgH.toFixed(2)} vs ${avgL.toFixed(2)}). Progressió funcional favorable.`
+      : `Correlació moderada entre càrrega i dolor. Score similar en dies d'alta (${avgH.toFixed(2)}) i baixa activitat (${avgL.toFixed(2)}).`;
+    corrHtml = `<div class="corr-insight">${txt}</div>`;
+  }
+  return `<div class="card card-corr">
+    <div class="card-title" style="color:var(--blue)">Càrrega vs Dolor · Correlació Funcional</div>
+    <div class="card-sub">Eix esquerre: Dolor Y 0–5 · Eix dret: Passos · Retard de resposta 24–48h</div>
+    <div class="chart-filter">
+      <button class="cfbtn" data-f="14" onclick="setFilter(14)">14 dies</button>
+      <button class="cfbtn on" data-f="30" onclick="setFilter(30)">30 dies</button>
+      <button class="cfbtn" data-f="all" onclick="setFilter('all')">Tot el procés</button>
+    </div>
+    <div class="chart-wrap chart-h200"><canvas id="chart2"></canvas></div>
+    <div class="chart-legend">
+      <div class="cl-item"><div class="cl-line" style="background:var(--amber)"></div>Dolor Y (eix esq. 0–5)</div>
+      <div class="cl-item"><div class="cl-zone" style="background:rgba(255,107,53,0.45)"></div>Passos (eix dret)</div>
+      <div class="cl-item" style="font-size:9px;color:var(--text-3)">⚠ Barres altes → risc pic dolor +24–48h</div>
+    </div>
+    ${corrHtml}
+  </div>`;
+}
+
+/* ── CONFORT + DOLOR CLÍNIC ── */
+function buildTimeline() {
+  return `<div class="card">
+    <div class="card-title">Evolució Temporal · Confort i Dolor Clínic</div>
+    <div class="card-sub">Filtre compartit amb la gràfica de correlació · marcadors de visites mèdiques</div>
+
+    <div class="chart-section-lbl">
+      <span>↑ CONFORT GLOBAL</span>
+      <span class="csl-badge csl-up">↑ = millora</span>
+      <span style="font-size:9px;color:var(--text-3)">Score invertit 0–6</span>
+    </div>
+    <div class="chart-wrap chart-h180"><canvas id="mainChart"></canvas></div>
+    <div class="chart-legend" style="margin-bottom:2px">
+      <div class="cl-item"><div class="cl-line" style="background:var(--amber)"></div>Confort diari</div>
+      <div class="cl-item"><div class="cl-line" style="border-top:2px dashed var(--green);background:none"></div>MA 7 dies</div>
+      <div class="cl-item"><div class="cl-zone" style="background:rgba(46,204,113,0.3)"></div>Excel·lent</div>
+      <div class="cl-item"><div class="cl-zone" style="background:rgba(255,69,58,0.18)"></div>Difícil</div>
+    </div>
+
+    <div class="chart-divider"></div>
+
+    <div class="chart-section-lbl">
+      <span>↓ DOLOR CLÍNIC · Escala Y 0–5</span>
+      <span class="csl-badge csl-down">↑ = empitjora</span>
+      <span style="font-size:9px;color:var(--text-3)">Format informe traumatologia</span>
+    </div>
+    <div class="chart-wrap chart-h180"><canvas id="chart1"></canvas></div>
+    <div class="chart-legend">
+      <div class="cl-item"><div class="cl-line" style="background:var(--amber)"></div>Dolor Y diari</div>
+      <div class="cl-item"><div class="cl-line" style="border-top:2px dashed rgba(255,255,255,0.25);background:none"></div>Mitja setmanal</div>
+      <div class="cl-item"><div class="cl-zone" style="background:rgba(46,204,113,0.22)"></div>Sense dolor</div>
+      <div class="cl-item"><div class="cl-zone" style="background:rgba(192,57,43,0.20)"></div>Intens</div>
+      <div class="cl-item" style="font-size:9px;color:var(--red)">① Pics per gravetat</div>
+    </div>
+  </div>`;
+}
+
+/* ── SETMANAL ── */
+function buildSetmanal() {
+  return `<div class="card">
+    <div class="card-title">Tendència Setmanal · Dolor Mig per Setmana</div>
+    <div class="card-sub">Evolució setmanal completa · línia blava = baseline S4 (Dr. Ríos 16/04) · passos totals dins la barra</div>
+    <div class="chart-wrap chart-h200"><canvas id="chart3"></canvas></div>
+    <div class="week-chart-legend">
+      <div class="wcl"><div class="wcl-sq" style="background:rgba(46,204,113,0.85)"></div>&lt;2.0 Excel·lent</div>
+      <div class="wcl"><div class="wcl-sq" style="background:rgba(120,200,80,0.85)"></div>&lt;2.4 Bé</div>
+      <div class="wcl"><div class="wcl-sq" style="background:rgba(241,196,15,0.85)"></div>&lt;2.8 Acceptable</div>
+      <div class="wcl"><div class="wcl-sq" style="background:rgba(230,126,34,0.85)"></div>&lt;3.5 Difícil</div>
+      <div class="wcl"><div class="wcl-sq" style="background:rgba(192,57,43,0.85)"></div>≥3.5 Crític</div>
+    </div>
+  </div>`;
+}
+
+/* ── INSIGHTS IA (MILLORAT) ── */
+function buildInsights(items) {
+  return `<div class="card card-accent">
+    <div class="card-title">Lectura Automàtica del Procés</div>
+    <div class="card-sub">Patrons detectats a partir de les dades registrades · interpretació clínica funcional</div>
+    <div class="ins-ai-lbl">◈ Anàlisi basada en les dades del seguiment</div>
+    <div class="insights-grid">${items.map(it=>`
+    <div class="ins">
+      <div class="ins-icon">${it.icon}</div>
+      <div class="ins-body">
+        <div class="ins-title">${it.title}</div>
+        <div class="ins-msg">${it.msg}</div>
+      </div>
+      <span class="ins-badge ${it.badgeCls}">${it.badge}</span>
+    </div>`).join('')}</div>
+  </div>`;
+}
+
+/* ── TIMELINE MÈDIC (NOU) ── */
+function buildVisits(visits) {
+  if (!visits.length) return `<div class="card"><div class="card-title">Historial Mèdic</div><div class="card-sub" style="margin-top:6px">Cap visita detectada en les observacions.</div></div>`;
+  const shown = visits.slice(-10).reverse();
+  return `<div class="card">
+    <div class="card-title">Historial Mèdic</div>
+    <div class="card-sub">Visites i events clínics · detecció automàtica de les observacions</div>
+    <div class="tl-wrap">
+      <div class="tl-line"></div>
+      ${shown.map(v=>`
+      <div class="tl-item">
+        <div class="tl-dot-wrap">
+          <div class="tl-dot" style="background:${v.col};box-shadow:0 0 0 2px ${v.col}33"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-header">
+            <span class="tl-date">${v.lbl}</span>
+            <span class="tl-tag" style="border-color:${v.col}44;color:${v.col}">${v.tag}</span>
+          </div>
+          <div class="tl-txt">${v.txt||'—'}</div>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function buildWeekTable() {
+  const weeks = computeWeeks(ALL);
+  const rows = weeks.map((w,i) => {
+    const prev = weeks[i-1];
+    let tTxt='—', tCol='var(--text-3)';
+    if (prev && w.avgSc!==null && prev.avgSc!==null) {
+      const d = prev.avgSc - w.avgSc;
+      if (d>0.1) { tTxt='↑ Millora'; tCol='var(--green)'; }
+      else if (d<-0.1) { tTxt='↓ Empitjora'; tCol='var(--red)'; }
+      else { tTxt='→ Estable'; tCol='var(--amber)'; }
+    }
+    return `<tr>
+      <td><strong>S${w.n}</strong><br><span style="font-size:10px;color:var(--text-3)">${w.lblFull}</span></td>
+      <td class="wt-score ${scoreClass(w.avgSc)}">${w.avgSc!==null?w.avgSc.toFixed(2):'—'}</td>
+      <td style="font-size:11px;color:${tCol}">${tTxt}</td>
+      <td>${w.avgDM!==null?w.avgDM.toFixed(1):'—'}</td>
+      <td>${w.avgPas!==null?Math.round(w.avgPas).toLocaleString('ca-ES'):'—'}</td>
+      <td>${w.fisioD}/${w.dies}</td>
+    </tr>`;
+  }).reverse().slice(0,8).join('');
+  return `<div class="week-wrap"><table class="wt">
+    <tr><th>Setmana</th><th>Score mig</th><th>Tendència</th><th>Dolor M mig</th><th>Passos mig</th><th>Fisio</th></tr>
+    ${rows}
+  </table></div>`;
+}
+
+/* ══════════════════════════════════════════════
+   CHARTS (LÒGICA INTACTA)
+══════════════════════════════════════════════ */
+function drawChart() {
+  const canvas = document.getElementById('mainChart');
+  if (!canvas) return;
+  if (CHART_OBJ) { CHART_OBJ.destroy(); CHART_OBJ = null; }
+  const fd = FILTER==='all' ? ALL : ALL.slice(-FILTER);
+  const labels = fd.map(r => r.lbl);
+  const comforts = fd.map(r => toComfort(r.score));
+  const maComfort = movAvg(comforts, 7);
+  const fdDias = new Set(fd.map(r => r.dia));
+  const eventsInRange = ALL_EVENTS.filter(e => fdDias.has(e.dia));
+  const worstInRange = detectWorstDays(fd, 5);
+  const ctx = canvas.getContext('2d');
+  const grad = ctx.createLinearGradient(0,0,0,264);
+  grad.addColorStop(0,'rgba(245,166,35,0.16)');
+  grad.addColorStop(0.55,'rgba(245,166,35,0.04)');
+  grad.addColorStop(1,'rgba(245,166,35,0)');
+  const worstPlugin = {
+    id: 'worstDaysC',
+    afterDraw(chart) {
+      if (!worstInRange.length) return;
+      const { ctx:c, chartArea, scales } = chart;
+      if (!chartArea) return;
+      c.save();
+      worstInRange.forEach((wp,ni) => {
+        const idx = fd.findIndex(r => r.dia===wp.dia);
+        if (idx<0) return;
+        const comfort = toComfort(wp.score);
+        const x = scales.x.getPixelForTick(idx), y = scales.y.getPixelForValue(comfort);
+        if (x===undefined||y===undefined) return;
+        c.beginPath(); c.arc(x,y,8,0,Math.PI*2);
+        c.fillStyle='rgba(255,69,58,0.82)'; c.fill();
+        c.strokeStyle='rgba(255,255,255,0.18)'; c.lineWidth=1; c.stroke();
+        c.font='bold 9px -apple-system,sans-serif';
+        c.fillStyle='#FFF'; c.textAlign='center'; c.textBaseline='middle';
+        c.fillText(String(ni+1),x,y);
+      });
+      c.restore();
+    }
+  };
+  CHART_OBJ = new Chart(canvas, {
+    type:'line',
+    data:{
+      labels,
+      datasets:[
+        { label:'Confort diari', data:comforts, borderColor:'rgba(245,166,35,0.85)', backgroundColor:grad, tension:0.4, fill:true, pointRadius:fd.length>40?0:2, pointHoverRadius:4, pointBackgroundColor:'#F5A623', pointBorderColor:'transparent', borderWidth:1.5, order:2 },
+        { label:'MA 7 dies', data:maComfort, borderColor:'rgba(46,204,113,0.55)', borderWidth:1.2, tension:0.45, borderDash:[5,4], pointRadius:0, fill:false, order:1 }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false},
+        tooltip:{backgroundColor:'#212124',titleColor:'rgba(240,235,227,0.5)',bodyColor:'#F0EBE3',borderColor:'rgba(255,255,255,0.08)',borderWidth:1,padding:10,cornerRadius:10,
+          callbacks:{ title:ctx=>`Dia: ${labels[ctx[0].dataIndex]}`, label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y?.toFixed(2)||'—'} · ${comfortLabel(ctx.parsed.y)}` }}
+      },
+      scales:{
+        x:{ ticks:{font:{size:9},color:'#44444A',maxTicksLimit:fd.length>30?8:fd.length}, grid:{display:false}, border:{display:false} },
+        y:{ min:0, max:6, ticks:{font:{size:9},color:'#44444A',stepSize:1,callback:v=>{const l={0:'Molt difícil',2:'Regular',3:'Acceptable',4:'Bé',5:'Excel·lent',6:''};return l[v]!==undefined?l[v]:''}}, grid:{color:'rgba(255,255,255,0.03)',drawBorder:false}, border:{display:false} }
+      },
+      animation:{duration:400,easing:'easeOutQuart'}
+    },
+    plugins:[comfortZonesPlugin, makeEventsPlugin('evtC', ()=>eventsInRange, ()=>labels), worstPlugin]
+  });
+}
+
+function drawDolorDiari() {
+  const canvas = document.getElementById('chart1');
+  if (!canvas) return;
+  if (CHART1_OBJ) { CHART1_OBJ.destroy(); CHART1_OBJ = null; }
+  const fd = FILTER==='all' ? ALL : ALL.slice(-FILTER);
+  const labels = fd.map(r => r.lbl);
+  const scores = fd.map(r => r.score);
+  const weeks = computeWeeks(ALL);
+  const weekAvgMap = {};
+  weeks.forEach(w => { w.days.forEach(d => { weekAvgMap[d] = w.avgSc; }); });
+  const weekLine = fd.map(r => weekAvgMap[r.dia] ?? null);
+  const fdDias = new Set(fd.map(r => r.dia));
+  const eventsInRange = ALL_EVENTS.filter(e => fdDias.has(e.dia));
+  const ctx = canvas.getContext('2d');
+  const grad = ctx.createLinearGradient(0,0,0,264);
+  grad.addColorStop(0,'rgba(245,166,35,0.14)');
+  grad.addColorStop(0.6,'rgba(245,166,35,0.03)');
+  grad.addColorStop(1,'rgba(245,166,35,0)');
+  CHART1_OBJ = new Chart(canvas, {
+    type:'line',
+    data:{
+      labels,
+      datasets:[
+        { label:'Dolor Y', data:scores, borderColor:'rgba(245,166,35,0.85)', backgroundColor:grad, tension:0.4, fill:true, pointRadius:fd.length>40?0:2, pointHoverRadius:4,
+          pointBackgroundColor:scores.map(s => s>=3.5?'#FF453A':s>=2.5?'#F5A623':'#2ECC71'), pointBorderColor:'transparent', borderWidth:1.5, order:2 },
+        { label:'Mitja setmanal', data:weekLine, borderColor:'rgba(180,180,180,0.22)', borderWidth:1.2, borderDash:[5,4], tension:0.15, pointRadius:0, fill:false, order:1, spanGaps:true }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false},
+        tooltip:{backgroundColor:'#212124',titleColor:'rgba(240,235,227,0.5)',bodyColor:'#F0EBE3',borderColor:'rgba(255,255,255,0.08)',borderWidth:1,padding:10,cornerRadius:10,
+          callbacks:{ title:ctx=>`Dia: ${labels[ctx[0].dataIndex]}`, label:ctx=>`${ctx.dataset.label}: ${ctx.parsed.y?.toFixed(2)||'—'} · ${scoreLabel(ctx.parsed.y)}` }}
+      },
+      scales:{
+        x:{ ticks:{font:{size:9},color:'#44444A',maxTicksLimit:fd.length>30?8:fd.length}, grid:{display:false}, border:{display:false} },
+        y:{ min:0, max:5,
+          ticks:{font:{size:9},color:'#44444A',stepSize:1,callback:v=>({0:'Cap dolor',1:'',2:'Moderat',3:'',4:'Intens',5:''})[v]??''},
+          grid:{color:'rgba(255,255,255,0.03)',drawBorder:false}, border:{display:false} }
+      },
+      animation:{duration:400,easing:'easeOutQuart'}
+    },
+    plugins:[painZonesPlugin, makeEventsPlugin('evtD', ()=>eventsInRange, ()=>labels, true), makeWorstPlugin(()=>fd, ()=>labels)]
+  });
+}
+
+function drawPassosDolor() {
+  const canvas = document.getElementById('chart2');
+  if (!canvas) return;
+  if (CHART2_OBJ) { CHART2_OBJ.destroy(); CHART2_OBJ = null; }
+  const fd = FILTER==='all' ? ALL : ALL.slice(-FILTER);
+  const labels = fd.map(r => r.lbl);
+  const scores = fd.map(r => r.score);
+  const passos = fd.map(r => r.passos);
+  const fdDias = new Set(fd.map(r => r.dia));
+  const eventsInRange = ALL_EVENTS.filter(e => fdDias.has(e.dia));
+  const barBg = passos.map(p => p!==null&&p>4000 ? 'rgba(255,69,58,0.52)' : p!==null&&p>2500 ? 'rgba(255,107,53,0.42)' : 'rgba(255,107,53,0.28)');
+  CHART2_OBJ = new Chart(canvas, {
+    type:'bar',
+    data:{
+      labels,
+      datasets:[
+        { type:'line', label:'Dolor Y', data:scores, borderColor:'#F5A623', backgroundColor:'transparent', tension:0.3,
+          pointRadius:fd.length>40?0:2.5, pointHoverRadius:5,
+          pointBackgroundColor:scores.map(s=>s>=3.5?'#FF453A':s>=2.5?'#F5A623':'#2ECC71'),
+          borderWidth:2, yAxisID:'yDolor', order:1, z:10 },
+        { type:'bar', label:'Passos', data:passos, backgroundColor:barBg, borderColor:'transparent',
+          borderWidth:0, borderRadius:3, yAxisID:'yPassos', order:2 }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false},
+        tooltip:{backgroundColor:'#212124',bodyColor:'#F0EBE3',borderColor:'rgba(255,255,255,0.08)',borderWidth:1,padding:10,cornerRadius:10,
+          callbacks:{ title:ctx=>`Dia: ${labels[ctx[0].dataIndex]}`,
+            label:ctx=>ctx.dataset.label==='Dolor Y'?`Dolor: ${ctx.parsed.y?.toFixed(2)||'—'} · ${scoreLabel(ctx.parsed.y)}`:`Passos: ${ctx.parsed.y?.toLocaleString('ca-ES')||'—'}` }}
+      },
+      scales:{
+        x:{ ticks:{font:{size:9},color:'#44444A',maxTicksLimit:fd.length>30?8:fd.length}, grid:{display:false}, border:{display:false} },
+        yDolor:{ position:'left', min:0, max:5, ticks:{font:{size:9},color:'rgba(245,166,35,0.65)',callback:v=>v%1===0?v:''}, grid:{color:'rgba(255,255,255,0.03)',drawBorder:false}, border:{display:false} },
+        yPassos:{ position:'right', min:0, grid:{display:false}, ticks:{font:{size:9},color:'rgba(255,107,53,0.55)',callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v}, border:{display:false} }
+      },
+      animation:{duration:400,easing:'easeOutQuart'}
+    },
+    plugins:[makeEventsPlugin('evtP', ()=>eventsInRange, ()=>labels, false)]
+  });
+}
+
+function drawSetmanal() {
+  const canvas = document.getElementById('chart3');
+  if (!canvas) return;
+  if (CHART3_OBJ) { CHART3_OBJ.destroy(); CHART3_OBJ = null; }
+  const weeks = computeWeeks(ALL);
+  const barColors = weeks.map(w => weekBarColor(w.avgSc));
+  CHART3_OBJ = new Chart(canvas, {
+    type:'bar',
+    data:{
+      labels: weeks.map(w => [w.lbl, w.lblFull.slice(0,11)]),
+      datasets:[{ label:'Dolor mig', data:weeks.map(w=>w.avgSc), backgroundColor:barColors, borderRadius:5, borderWidth:0 }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false},
+        tooltip:{backgroundColor:'#212124',bodyColor:'#F0EBE3',borderColor:'rgba(255,255,255,0.08)',borderWidth:1,padding:10,cornerRadius:10,
+          callbacks:{
+            title:ctx=>`${weeks[ctx[0].dataIndex]?.lbl} · ${weeks[ctx[0].dataIndex]?.lblFull}`,
+            label:ctx=>[`Dolor mig: ${ctx.parsed.y?.toFixed(2)||'—'} · ${scoreLabel(ctx.parsed.y)}`,`Passos totals: ~${(weeks[ctx[0].dataIndex]?.totalPas/1000).toFixed(0)}k`,`Fisio: ${weeks[ctx[0].dataIndex]?.fisioD}/${weeks[ctx[0].dataIndex]?.dies} dies`]
+          }}
+      },
+      scales:{
+        x:{ ticks:{font:{size:9},color:'#8A8A90'}, grid:{display:false}, border:{display:false} },
+        y:{ min:0, max:5, ticks:{font:{size:9},color:'#44444A',stepSize:1,callback:v=>v%1===0?v:''}, grid:{color:'rgba(255,255,255,0.03)',drawBorder:false}, border:{display:false} }
+      },
+      animation:{duration:400,easing:'easeOutQuart'}
+    },
+    plugins:[baselineS4Plugin, makeValueLabelsPlugin(()=>weeks)]
+  });
+}
+
+/* ══════════════════════════════════════════════
+   FILTER
+══════════════════════════════════════════════ */
+function setFilter(f) {
+  FILTER = f;
+  document.querySelectorAll('.cfbtn').forEach(b => b.classList.toggle('on', String(b.dataset.f)===String(f)));
+  drawChart();
+  drawDolorDiari();
+  drawPassosDolor();
+}
+
+/* ══════════════════════════════════════════════
+   TOLERÀNCIA ALS PASSOS
+══════════════════════════════════════════════ */
+function computeTolerancia() {
+  const weeks = computeWeeks(ALL);
+  return weeks.map(w => {
+    const wDays = ALL.filter(r => w.days.includes(r.dia) && r.passos !== null && r.score !== null && r.score > 0);
+    if (wDays.length < 2) return { n: w.n, lbl: w.lbl, lblFull: w.lblFull, index: null, avgPas: w.avgPas, avgSc: w.avgSc, threshold: null, dies: wDays.length };
+    const avgPas = avg(wDays.map(r => r.passos));
+    const avgSc  = avg(wDays.map(r => r.score));
+    const index  = avgSc > 0 ? Math.round(avgPas / avgSc) : null;
+    const goodDays = wDays.filter(r => r.score <= 2.5);
+    const threshold = goodDays.length > 0 ? Math.max(...goodDays.map(r => r.passos)) : null;
+    return { n: w.n, lbl: w.lbl, lblFull: w.lblFull, index, avgPas, avgSc, threshold, dies: wDays.length };
+  });
+}
+
+function computeZones() {
+  const zones = [
+    { label: '<1.5k passos', min: 0, max: 1500 },
+    { label: '1.5–3k passos', min: 1500, max: 3000 },
+    { label: '3–4.5k passos', min: 3000, max: 4500 },
+    { label: '>4.5k passos', min: 4500, max: Infinity },
+  ];
+  return zones.map(z => {
+    const days = ALL.filter(r => r.passos !== null && r.score !== null && r.passos >= z.min && r.passos < z.max);
+    return { label: z.label, count: days.length, avgScore: days.length ? avg(days.map(r => r.score)) : null };
+  });
+}
+
+function buildTolerancia(tol, zones) {
+  const validTol = tol.filter(w => w.index !== null);
+  // Lògica de tendència
+  let summaryHtml = '';
+  if (validTol.length >= 2) {
+    const first3 = validTol.slice(0, Math.min(3, validTol.length));
+    const last3  = validTol.slice(-Math.min(3, validTol.length));
+    const avgFirst = avg(first3.map(w => w.index));
+    const avgLast  = avg(last3.map(w => w.index));
+    const lastW = validTol[validTol.length - 1];
+    const prevW = validTol[validTol.length - 2];
+    const weekDelta = lastW && prevW && lastW.index && prevW.index ? lastW.index - prevW.index : null;
+    const trend = avgLast > avgFirst * 1.1 ? '↑ Tolerància creixent' : avgLast < avgFirst * 0.9 ? '↓ Tolerància decreixent' : '→ Tolerància estable';
+    const bestW = [...validTol].sort((a,b) => (b.index||0)-(a.index||0))[0];
+    const thresholdW = validTol.filter(w => w.threshold !== null).slice(-1)[0];
+    const thresholdTxt = thresholdW ? `Llindar de confort actual (dolor ≤2.5): <strong>≤${thresholdW.threshold.toLocaleString('ca-ES')} passos</strong>.` : '';
+    const deltaNote = weekDelta !== null ? ` Variació setmana actual vs anterior: <strong>${weekDelta > 0 ? '+' : ''}${weekDelta.toLocaleString('ca-ES')} pas/punt dolor</strong>.` : '';
+    summaryHtml = `<div class="tol-summary">${trend}. Índex màxim registrat: <strong>${bestW?.lbl} (${bestW?.index?.toLocaleString('ca-ES')} passos/punt dolor)</strong>. ${thresholdTxt}${deltaNote}</div>`;
+  }
+
+  // Zones de dolor per rang de passos
+  const zoneColors = ['rgba(46,204,113,0.75)','rgba(241,196,15,0.75)','rgba(255,107,53,0.75)','rgba(255,69,58,0.75)'];
+  const zonesHtml = zones.map((z,i) => {
+    const c = z.avgScore !== null ? scoreClass(z.avgScore) : 'c-neut';
+    return `<div class="tol-zone">
+      <div class="tol-zone-lbl">${z.label}</div>
+      <div class="tol-zone-count" style="color:${zoneColors[i]}">${z.count}</div>
+      <div class="tol-zone-score ${c}">${z.avgScore !== null ? 'dolor mig ' + z.avgScore.toFixed(2) : '—'}</div>
+    </div>`;
+  }).join('');
+
+  return `<div class="card tol-card">
+    <div class="card-title" style="color:var(--blue)">Tolerància als Passos · Índex Setmanal</div>
+    <div class="card-sub">Càlcul automàtic: passos mig / dolor mig per setmana · evolució de la tolerància funcional</div>
+    <div class="chart-wrap chart-h200"><canvas id="chart4"></canvas></div>
+    <div class="chart-legend">
+      <div class="cl-item"><div class="cl-line" style="background:var(--blue)"></div>Índex tolerància (passos/punt dolor) · eix esq.</div>
+      <div class="cl-item"><div class="cl-zone" style="background:rgba(46,204,113,0.5)"></div>Passos mig setmanal · eix dret</div>
+    </div>
+    <div class="sec-lbl" style="margin-top:14px">Distribució del dolor per zona d'activitat</div>
+    <div class="tol-zones">${zonesHtml}</div>
+    ${summaryHtml}
+  </div>`;
+}
+
+function drawTolerancia(tol) {
+  const canvas = document.getElementById('chart4');
+  if (!canvas) return;
+  if (CHART4_OBJ) { CHART4_OBJ.destroy(); CHART4_OBJ = null; }
+  const validTol = tol.filter(w => w.index !== null);
+  if (validTol.length < 2) return;
+  const labels  = validTol.map(w => w.lbl);
+  const indexes = validTol.map(w => w.index);
+  const passos  = validTol.map(w => w.avgPas ? Math.round(w.avgPas) : null);
+  const barColors = indexes.map((v, i) =>
+    i === 0 || !indexes[i-1] ? 'rgba(90,200,250,0.45)' :
+    v >= indexes[i-1] ? 'rgba(46,204,113,0.55)' : 'rgba(255,107,53,0.55)'
+  );
+  CHART4_OBJ = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { type:'line', label:'Índex tolerància', data:indexes, borderColor:'#5AC8FA',
+          backgroundColor:'transparent', borderWidth:2, tension:0.35, pointRadius:4,
+          pointBackgroundColor:'#5AC8FA', yAxisID:'yIndex', order:1, z:10 },
+        { type:'bar', label:'Passos mig', data:passos, backgroundColor:barColors,
+          borderRadius:4, borderWidth:0, yAxisID:'yPassos', order:2 }
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false},
+        tooltip:{ backgroundColor:'#212124', bodyColor:'#F0EBE3',
+          borderColor:'rgba(255,255,255,0.08)', borderWidth:1, padding:10, cornerRadius:10,
+          callbacks:{
+            title:ctx=>`${validTol[ctx[0].dataIndex]?.lbl} · ${validTol[ctx[0].dataIndex]?.lblFull}`,
+            label:ctx=>ctx.dataset.label==='Índex tolerància'
+              ? `Tolerància: ${ctx.parsed.y?.toLocaleString('ca-ES')} passos/punt dolor`
+              : `Passos mig: ${ctx.parsed.y?.toLocaleString('ca-ES')}`
+          }
+        }
+      },
+      scales:{
+        x:{ ticks:{font:{size:9},color:'#8A8A90'}, grid:{display:false}, border:{display:false} },
+        yIndex:{ position:'left', min:0,
+          ticks:{font:{size:9},color:'rgba(90,200,250,0.7)',callback:v=>v>=1000?(v/1000).toFixed(1)+'k':v},
+          grid:{color:'rgba(255,255,255,0.03)',drawBorder:false}, border:{display:false},
+          title:{display:true,text:'passos/dolor',color:'rgba(90,200,250,0.35)',font:{size:8}} },
+        yPassos:{ position:'right', min:0, grid:{display:false},
+          ticks:{font:{size:9},color:'rgba(46,204,113,0.5)',callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v},
+          border:{display:false} }
+      },
+      animation:{duration:400,easing:'easeOutQuart'}
+    }
+  });
+}
+
+/* ══════════════════════════════════════════════
+   INSIGHTS IA CLÍNICS
+══════════════════════════════════════════════ */
+function computeInsights(kRow, trendDelta, avg7) {
+  const items = [];
+
+  // 1. Tendència general
+  if (trendDelta !== null) {
+    if (trendDelta > 0.25)
+      items.push({ icon:'📈', title:'Millora funcional sostinguda', msg:`Score mig 7 dies: ${avg7?.toFixed(2)}. La recuperació avança de forma consistent (+${trendDelta.toFixed(2)} respecte la setmana anterior).`, badge:'Millora', badgeCls:'b-good' });
+    else if (trendDelta < -0.25)
+      items.push({ icon:'⚠', title:'Tendència d\'alerta detectada', msg:`El score ha pujat ${Math.abs(trendDelta).toFixed(2)} punts els últims 7 dies. Revisar la càrrega d'activitat i la qualitat del repòs.`, badge:'Atenció', badgeCls:'b-warn' });
+    else
+      items.push({ icon:'→', title:'Estabilitat clínica', msg:`Score mig 7 dies: ${avg7?.toFixed(2)}. La recuperació avança gradualment sense regressions significatives.`, badge:'Estable', badgeCls:'b-info' });
+  }
+
+  // 2. Correlació passos/dolor
+  const highDays = ALL.filter(r => r.passos > 3500 && r.score !== null);
+  const lowDays = ALL.filter(r => r.passos !== null && r.passos < 2500 && r.score !== null);
+  if (highDays.length >= 3 && lowDays.length >= 3) {
+    const diff = avg(highDays.map(r=>r.score)) - avg(lowDays.map(r=>r.score));
+    if (diff > 0.3)
+      items.push({ icon:'👟', title:'Dies d\'alta càrrega associats a major dolor', msg:`Dies amb >3.500 passos mostren un score ${diff.toFixed(2)} punts superior als dies de baixa activitat. Retard de resposta de 24–48h.`, badge:'Correlació', badgeCls:'b-alert' });
+    else if (diff < -0.1)
+      items.push({ icon:'👟', title:'Bona tolerància a la càrrega funcional', msg:`No s'observa augment de dolor els dies d'alta activitat. Indicador positiu de progressió funcional.`, badge:'Positiu', badgeCls:'b-good' });
+  }
+
+  // 3. Constància fisio
+  const fisioCount7 = ALL.slice(-7).filter(r=>isSi(r.fisio)).length;
+  if (fisioCount7 >= 3)
+    items.push({ icon:'💆', title:'Fisioteràpia consistent aquesta setmana', msg:`${fisioCount7} sessions en els últims 7 dies. La constància terapèutica coincideix amb els períodes d'estabilització clínica observats.`, badge:'Consistent', badgeCls:'b-good' });
+  else if (fisioCount7 === 0 && ALL.length > 7)
+    items.push({ icon:'💆', title:'Setmana sense fisioteràpia', msg:`Cap sessió registrada en els últims 7 dies. Valorar reprendre la pauta terapèutica establerta.`, badge:'Pendent', badgeCls:'b-warn' });
+
+  // 4. Son
+  const avgSon7 = avg(ALL.slice(-7).map(r=>r.son).filter(v=>v!==null));
+  if (avgSon7 !== null && avgSon7 < 6.5)
+    items.push({ icon:'😴', title:'Son insuficient els últims 7 dies', msg:`Mitja de ${fmtH(avgSon7)} de son. El repòs inadequat afecta la recuperació tissular i incrementa la sensibilitat al dolor.`, badge:'Descans', badgeCls:'b-warn' });
+
+  // 5. Inflamació activa
+  if (kRow.inflam !== null && kRow.inflam >= 3)
+    items.push({ icon:'🔥', title:'Inflamació activa detectable', msg:`Nivell ${kRow.inflam}/6 avui. Considerar reducció de la càrrega mecànica i aplicació de magnetoteràpia o crioterapia.`, badge:'Actiu', badgeCls:'b-alert' });
+
+  // 6. Plateau
+  const maFull = movAvg(ALL.map(r=>r.score), 7);
+  const ma14 = maFull.slice(-14).filter(v=>v!==null);
+  if (ma14.length>=10 && Math.abs(ma14[0]-ma14[ma14.length-1])<0.15)
+    items.push({ icon:'⟳', title:'Fase de plateau de recuperació', msg:`La mitja mòbil 7 dies s'ha mantingut estable (±0.15) durant les últimes dues setmanes. Fase habitual en processos de recuperació tendinosa complexa.`, badge:'Plateau', badgeCls:'b-info' });
+
+  // 7. Sobrecàrrega avui
+  if (kRow.passos !== null) {
+    const prev7avg = avg(ALL.slice(-8,-1).map(r=>r.passos));
+    if (prev7avg && kRow.passos > prev7avg * 1.45)
+      items.push({ icon:'⚡', title:'Càrrega superior a la mitja recent', msg:`Avui ${kRow.passos.toLocaleString('ca-ES')} passos (${Math.round((kRow.passos/prev7avg-1)*100)}% per sobre de la mitja setmanal de ${Math.round(prev7avg).toLocaleString('ca-ES')}). Monitoritzar la resposta en les properes 24–48h.`, badge:'Precaució', badgeCls:'b-warn' });
+  }
+
+  return items.slice(0, 5);
+}
+
+/* ══════════════════════════════════════════════
+   MAIN RENDER
+══════════════════════════════════════════════ */
+function computeFase(kRow, trend14, nRelapses, totalDies) {
+  const sc  = kRow?.score ?? null;
+  const dia = kRow?.dia   ?? totalDies;
+  if (sc === null) return { label: 'Consolidació', color: 'amber' };
+  if (sc < 1.2 && trend14 >= -0.1 && dia > 60)
+    return { label: 'Manteniment', color: 'green' };
+  if (sc < 2.0 && dia > 45 && nRelapses < 3)
+    return { label: 'Recuperació funcional', color: 'blue' };
+  if (sc < 2.8 && dia > 20)
+    return { label: 'Consolidació', color: 'amber' };
+  if (sc < 3.5 || (dia > 14 && sc < 3.8))
+    return { label: 'Subaguda', color: 'orange' };
+  return { label: 'Aguda', color: 'red' };
+}
+
+function buildAnalisiClinica() {
+  if (ALL.length < 3) return '';
+  const last7  = ALL.slice(-7).filter(r => r.score !== null);
+  const last30 = ALL.slice(-30).filter(r => r.score !== null);
+  const all    = ALL.filter(r => r.score !== null);
+  const avgArr = arr => arr.length ? arr.reduce((a,b)=>a+b,0)/arr.length : null;
+  const minV   = arr => arr.length ? Math.min(...arr) : null;
+  const maxV   = arr => arr.length ? Math.max(...arr) : null;
+  const avg7cl   = avgArr(last7.map(r=>r.score));
+  const avg30cl  = avgArr(last30.map(r=>r.score));
+  const last14 = ALL.slice(-14).filter(r=>r.score!==null);
+  const firstH = last14.slice(0, Math.floor(last14.length/2));
+  const secH   = last14.slice(Math.floor(last14.length/2));
+  const trend14 = (firstH.length && secH.length) ? avgArr(firstH.map(r=>r.score)) - avgArr(secH.map(r=>r.score)) : 0;
+  const relapses = all.filter((r,i) => i>0 && r.score>=3.5 && all[i-1].score<2.8);
+  const passos7  = last7.filter(r=>r.passos).map(r=>r.passos);
+  const avgPas7  = avgArr(passos7);
+  const inflam7  = last7.filter(r=>r.inflam!==null).map(r=>r.inflam);
+  const avgInflam7 = avgArr(inflam7);
+  const coix7  = last7.filter(r=>r.coixesa!==null).map(r=>r.coixesa);
+  const avgCoix7 = avgArr(coix7);
+  const fase = computeFase(ALL[ALL.length-1], trend14, relapses.length, all.length);
+  let parts = [];
+  const totalDies = ALL[ALL.length-1]?.dia || all.length;
+  parts.push(`Porta ${totalDies} dies de seguiment registrat. `);
+  if (avg7cl !== null) {
+    const min7 = minV(last7.map(r=>r.score));
+    const max7 = maxV(last7.map(r=>r.score));
+    const nivell = avg7cl < 1.5 ? 'nivells baixos, ben tolerats' :
+                   avg7cl < 2.5 ? 'nivells moderats-baixos' :
+                   avg7cl < 3.5 ? 'nivells moderats, que requereixen atenció' :
+                                   'nivells alts, que indiquen activitat inflamatòria important';
+    parts.push(`Durant els darrers 7 dies, el dolor s’ha mantingut en ${nivell} (mitjana ${avg7cl.toFixed(1)}/5, rang ${min7.toFixed(1)}–${max7.toFixed(1)}). `);
+  }
+  if (Math.abs(trend14) > 0.15) {
+    if (trend14 > 0.3)
+      parts.push(`La tendència de les darreres dues setmanes és clarament favorable: el dolor ha disminuït de forma progressiva. `);
+    else if (trend14 > 0.1)
+      parts.push(`S’observa una lleugera millora en la tendència global dels darrers 14 dies. `);
+    else if (trend14 < -0.3)
+      parts.push(`La tendència recent indica un empitjorament notable. Caldria revisar la càrrega d’activitat i els factors desencadenants. `);
+    else
+      parts.push(`La tendència recent mostra una lleugera regressió que mereix seguiment proper. `);
+  } else {
+    parts.push(`La tendència global dels darrers 14 dies mostra una estabilitat relativa. `);
+  }
+  if (avgPas7 !== null) {
+    const tolOk = avgPas7 >= 3000 && avg7cl < 2.5;
+    const tolRisc = avgPas7 >= 4000 && avg7cl >= 2.5;
+    if (tolOk)
+      parts.push(`La tolerància als passos és positiva: una activitat mitjana de ${Math.round(avgPas7).toLocaleString('ca-ES')} passos diaris no s’associa a augments significatius de dolor. `);
+    else if (tolRisc)
+      parts.push(`Amb una activitat mitjana de ${Math.round(avgPas7).toLocaleString('ca-ES')} passos diaris i un dolor de ${avg7cl.toFixed(1)}/5, és possible que hi hagi sobrecàrrega funcional. Es recomana moderar l’activitat temporalment. `);
+    else if (avgPas7 < 1500)
+      parts.push(`L’activitat d’aquests dies ha estat reduïda (${Math.round(avgPas7).toLocaleString('ca-ES')} passos de mitjana), compatible amb la fase actual de recuperació. `);
+    else
+      parts.push(`L’activitat diària s’ha mantingut en ${Math.round(avgPas7).toLocaleString('ca-ES')} passos de mitjana. `);
+  }
+  if (avgInflam7 !== null) {
+    if (avgInflam7 < 1)
+      parts.push(`L’inflamació és mínima o inexistent, la qual cosa és un signe positiu de resposta tissular. `);
+    else if (avgInflam7 < 2)
+      parts.push(`Es manté una lleugera inflamació residual (${avgInflam7.toFixed(1)}/5), habitual en aquesta fase del procés. `);
+    else if (avgInflam7 < 3)
+      parts.push(`L’inflamació present (${avgInflam7.toFixed(1)}/5) indica activitat inflamatòria activa. La crioterapía i el repòs relatiu segueixen sent rellevants. `);
+    else
+      parts.push(`L’inflamació és significativa (${avgInflam7.toFixed(1)}/5). Es recomana consultar amb el professional de referència per ajustar el tractament. `);
+  }
+  if (avgCoix7 !== null && avgCoix7 > 0.5) {
+    if (avgCoix7 < 1.5)
+      parts.push(`La marxa mostra una coixesa lleu (${avgCoix7.toFixed(1)}/5), que tendèix a millorar amb la progressió de la fisioteràpia. `);
+    else if (avgCoix7 < 2.5)
+      parts.push(`La coixesa moderada (${avgCoix7.toFixed(1)}/5) continua present, i és un indicador que la càrrega sobre la zona lesionada encara és limitant. `);
+    else
+      parts.push(`La coixesa marcada (${avgCoix7.toFixed(1)}/5) condiciona significativament la marxa. Caldrà valorar el suport ortopèdic o la descàrrega. `);
+  }
+  if (relapses.length > 0) {
+    if (relapses.length === 1)
+      parts.push(`S’ha registrat 1 episodi de reagudització durant el seguiment. `);
+    else
+      parts.push(`S’han registrat ${relapses.length} episodis de reagudització. Aquestes recaigudes suggereixen que la zona encara és sensible a la sobrecàrrega o a factors externs. `);
+  }
+  if (avg30cl !== null && avg7cl !== null && last30.length >= 14) {
+    const diff = avg30cl - avg7cl;
+    if (diff > 0.3)
+      parts.push(`Comparant els darrers 7 dies amb la mitjana del mes (${avg30cl.toFixed(1)}/5), s’evidencia una millora real i sostinguda de ${diff.toFixed(1)} punts. `);
+    else if (diff < -0.2)
+      parts.push(`La mitjana dels darrers 7 dies (${avg7cl.toFixed(1)}/5) és lleugerament pitjor que la del mes (${avg30cl.toFixed(1)}/5). Cal valorar si hi ha hagut un canvi d’activitat o un factor desencadenador. `);
+  }
+  const faseDescs = {
+    'Aguda': ['Prioritat absoluta: repòs, control del dolor i de la inflamació. Evitar activitat que incrementi els símptomes.', 'red'],
+    'Subaguda': ['Inici progressiu de la mobilitat i del tractament actiu. La fisioteràpia té un paper central en aquesta fase.', 'orange'],
+    'Consolidació': ['Fase de treball: tolerància creixent a la càrrega, enfortiment progressiu i consolidació dels guanys funcionals.', 'amber'],
+    'Recuperació funcional': ["La funció es recupera de forma activa. Mantenir la constància terapèutica i no forçar el ritme.", 'blue'],
+    'Manteniment': ["Fase de manteniment i prevenció. L’objectiu és evitar recaigudes i consolidar els guanys a llarg termini.", 'green'],
+  };
+  const faseDesc = faseDescs[fase.label] || ['Seguiment actiu.', 'neut'];
+  parts.push(`<strong>Fase actual estimada: ${fase.label}.</strong> ${faseDesc[0]}`);
+  const disclaimer = `<div style="margin-top:12px;font-size:10px;color:var(--text-3);line-height:1.6;border-top:1px solid var(--border);padding-top:10px">⚠ Aquesta anàlisi és orientativa i es basa en els valors registrats. No substitueix el criteri clínic del fisioterapeuta o metge responsable.</div>`;
+  return `
+    <div class="sec-lbl">Anàlisi clínica</div>
+    <div class="card card-accent" style="margin-bottom:10px">
+      <div class="card-title" style="color:var(--amber)">Anàlisi Clínica IA</div>
+      <div class="card-sub">Interpretació automàtica de l’evolució · Últims 7 i 30 dies</div>
+      <div style="font-size:12.5px;line-height:1.85;color:var(--text-2)">${parts.join('')}</div>
+      ${disclaimer}
+    </div>`;
+}
+
+async function render(rows) {
+  setLoadStep('Processant dades...');
+  ALL = parseRows(rows);
+  ALL_EVENTS = detectVisits(ALL);
+  const today = todayISO();
+  const kRow = ALL.find(r => r.iso===today) || ALL[ALL.length-1];
+  const last = ALL[ALL.length-1];
+  const avg7  = avg(ALL.slice(-7).map(r=>r.score));
+  const avgP7 = avg(ALL.slice(-14,-7).map(r=>r.score));
+  const trendDelta = (avg7!==null && avgP7!==null) ? (avgP7-avg7) : null;
+  const risk = computeRisk(kRow, trendDelta);
+  const recScore = computeRecoveryScore(kRow, trendDelta);
+  const monState = getMonitoringState(kRow, today);
+
+  setLoadStep('Generant resum clínic IA...');
+  let aiMsg = null, aiCtx = null, aiPred = [], aiCentral = null;
+  try {
+    const prompt = `Ets un assistent clínic de seguiment d'una recuperació de peu (fascitis plantar + peroneu curt + Aquil·les). Respon en català, to clínic tranquil, humà i intel·ligent. No absolut, no promeses.
+AVUI — dia ${kRow.dia}: Score=${kRow.score} (0–5, menor=millor→${scoreLabel(kRow.score)}) · Dolor M/V:${kRow.dolorM}/${kRow.dolorV} · Passos:${kRow.passos||'nr'} · Fisio:${kRow.fisio||'—'} · Inflamació:${kRow.inflam||'—'} · Trigger:${kRow.trigger||'—'} · Obs:${(kRow.obs||'—').slice(0,80)}
+TENDÈNCIA 7d: ${trendDelta!==null?(trendDelta>0.1?'millora':'empitjora'):'estable'} (delta:${trendDelta?.toFixed(2)||'—'}) · RISC:${risk.label} · RecoveryScore:${recScore}
+Retorna ÚNICAMENT JSON amb exactament aquests 4 camps:
+{"central":"10-14 paraules. Frase elegant i tranquil·la, cor emocional del dashboard. Ex: La recuperació avança amb constància i sense senyals d'alerta.",
+"hero":"25-35 paraules clínic. **negreta** en dades clau. Ex: Evolució estable amb lleugera millora funcional. Persistència de sensibilitat plantar amb tolerància moderada a càrrega.",
+"context":"12-18 paraules empàtiques sobre el dia, primera persona propera.",
+"prediction":["bullet 12-14p properes 7-14 dies si es manté tendència","bullet sobre inflamació o fisioteràpia","bullet sobre risc o recomanació subtil"]}`;
+    // IA no disponible en mode autònom — s'usen fallbacks calculats
+    throw new Error('Mode autònom: fallbacks actius.');
+    const m = raw.match(/\{[\s\S]*\}/);
+    if (m) {
+      const p = JSON.parse(m[0]);
+      aiMsg = p.hero||null; aiCtx = p.context||null;
+      aiPred = Array.isArray(p.prediction)?p.prediction:[];
+      aiCentral = p.central||null;
+    }
+  } catch(e) { /* silenci */ }
+
+  setLoadStep('Construint dashboard...');
+  const isToday = kRow.iso===today;
+  const insights = computeInsights(kRow, trendDelta, avg7);
+  const tol = computeTolerancia();
+  const zones = computeZones();
+  const H = [];
+  H.push('<div class="content">');
+
+  // Banner d'estat — només si no és avui
+  if (monState.cls === 'state-interrupted') {
+    H.push(`<div style="background:rgba(255,107,53,0.07);border:1px solid rgba(255,107,53,0.14);border-radius:10px;padding:9px 14px;font-size:11px;color:rgba(255,107,53,0.8);margin-bottom:10px;display:flex;align-items:center;gap:8px"><span style="opacity:0.7">⚑</span> Seguiment interromput · Darrer registre dia ${last.dia}. Considera reprendre el diari.</div>`);
+  } else if (monState.cls === 'state-pending') {
+    H.push(`<div style="background:rgba(245,166,35,0.06);border:1px solid rgba(245,166,35,0.12);border-radius:10px;padding:9px 14px;font-size:11px;color:rgba(245,166,35,0.7);margin-bottom:10px;display:flex;align-items:center;gap:8px"><span style="opacity:0.7">📋</span> Entrada pendent per avui · Es mostra el darrer registre disponible, dia ${last.dia}.</div>`);
+  }
+
+  /* ─ ORDRE: Hero → Mètriques → Context → CORRELACIÓ → TOLERÀNCIA → Timeline → Setmanal → Insights → Historial → Taula ─ */
+  H.push(buildHero(kRow, trendDelta, avg7, aiMsg, risk, recScore, monState, aiPred, aiCentral));
+  H.push('<div class="sec-lbl">Resum del dia</div>');
+  H.push(buildMetrics(kRow));
+  H.push(buildAnalisiClinica());
+  H.push(buildContext(kRow, aiCtx));
+  H.push('<div class="sec-lbl">Correlació càrrega vs dolor · insight clínic principal</div>');
+  H.push(buildCorrelacio());
+  H.push('<div class="sec-lbl">Tolerància als passos · índex setmanal automàtic</div>');
+  H.push(buildTolerancia(tol, zones));
+  H.push('<div class="sec-lbl">Evolució temporal · confort i dolor clínic</div>');
+  H.push(buildTimeline());
+  H.push('<div class="sec-lbl">Tendència setmanal · visió global</div>');
+  H.push(buildSetmanal());
+  H.push('<div class="sec-lbl">Lectura automàtica del procés</div>');
+  H.push(buildInsights(insights));
+  H.push('<div class="sec-lbl">Historial mèdic</div>');
+  H.push(buildVisits(ALL_EVENTS));
+  H.push('<div class="sec-lbl">Comparativa setmanal detallada</div>');
+  H.push(buildWeekTable());
+  H.push('<div class="spacer"></div></div>');
+
+  document.getElementById('main').innerHTML = H.join('');
+  document.getElementById('appDate').textContent =
+    new Date().toLocaleDateString('ca-ES',{day:'numeric',month:'long'});
+
+
+  // Dibuixar totes les gràfiques
+  drawPassosDolor(); // chart2 (correlació)
+  drawTolerancia(tol); // chart4 (tolerància)
+  drawChart();       // mainChart
+  drawDolorDiari();  // chart1
+  drawSetmanal();    // chart3
+  drawSparkline();   // hero sparkline
+}
+
+function setLoadStep(txt) {
+  const el = document.getElementById('loadStep');
+  if (el) el.textContent = txt;
+}
+
+/* ══════════════════════════════════════════════
+   LOAD — autònom, autònom, sense dependencies externes
+══════════════════════════════════════════════ */
+async function load() {
+  // 1. Intentar Google Sheet URL
+  if (GOOGLE_SHEET_URL) {
+    try {
+      setLoadStep('Carregant dades...');
+      const res = await fetch(GOOGLE_SHEET_URL, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const csv = await res.text();
+      const rows = parseCSV(csv);
+      if (rows.length) { await render(rows); return; }
+    } catch(e) { /* continua */ }
+  }
+  // 2. Intentar CSV local /data/registre.csv
+  try {
+    setLoadStep('Buscant dades locals...');
+    const res = await fetch(LOCAL_CSV_PATH, { cache: 'no-store' });
+    if (!res.ok) throw new Error('No trobat');
+    const csv = await res.text();
+    const rows = parseCSV(csv);
+    if (rows.length) { await render(rows); return; }
+  } catch(e) { /* continua */ }
+  // 3. Intentar localStorage (CSV guardat prèviament)
+  try {
+    const saved = localStorage.getItem(LS_KEY);
+    if (saved) {
+      const rows = parseCSV(saved);
+      if (rows.length) {
+        setLoadStep('Carregant registre guardat...');
+        await render(rows);
+        showSavedDataBanner();
+        return;
+      }
+    }
+  } catch(e) { /* continua */ }
+  // 4. Fallback manual
+  showManualCsvFallback();
+}
+
+function showSavedDataBanner() {
+  const b = document.createElement('div');
+  b.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--surface-2);border:1px solid var(--border-md);border-radius:10px;padding:8px 16px;font-size:11px;color:var(--text-2);z-index:200;display:flex;gap:10px;align-items:center';
+  b.innerHTML = '📂 Dades del registre guardat &nbsp;<button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--text-3);cursor:pointer;font-size:14px">×</button>';
+  document.body.appendChild(b);
+  setTimeout(() => b.remove(), 4000);
+}
+
+function showManualCsvFallback() {
+  document.getElementById('main').innerHTML = `
+    <div class="loading-wrap"><div class="loading-card">
+      <div style="font-size:32px;margin-bottom:14px">📋</div>
+      <div style="font-size:15px;font-weight:700;margin-bottom:8px;color:var(--text-1)">
+        Seguiment Clínic · Peu
+      </div>
+      <div style="font-size:12px;color:var(--text-2);line-height:1.7;margin-bottom:20px;max-width:280px;text-align:center">
+        Selecciona el teu registre CSV per veure el dashboard.<br>
+        El fitxer es guardarà localment per a properes visites.
+      </div>
+      <label style="display:inline-flex;align-items:center;gap:8px;background:var(--amber);color:#1A0F00;
+                    font-weight:700;font-size:13px;padding:12px 24px;border-radius:11px;cursor:pointer;
+                    margin-bottom:12px;box-shadow:0 4px 16px rgba(245,166,35,0.3)">
+        📂 Seleccionar registre CSV
+        <input type="file" accept=".csv,text/csv" style="display:none"
+               onchange="handleManualCsv(this.files[0])">
+      </label>
+      <div style="font-size:10px;color:var(--text-3);margin-top:4px">
+        Exporta el teu Google Sheet com CSV i selecciona'l aquí
+      </div>
+    </div></div>`;
+}
+
+function handleManualCsv(file) {
+  if (!file) return;
+  document.getElementById('main').innerHTML =
+    '<div class="loading-wrap"><div class="loading-card"><div class="load-spin"></div><div id="loadStep">Llegint fitxer...</div></div></div>';
+  const reader = new FileReader();
+  reader.onload = async e => {
+    try {
+      const csv = e.target.result;
+      const rows = parseCSV(csv);
+      if (!rows.length) throw new Error('El fitxer CSV no conté files llegibles.');
+      try { localStorage.setItem(LS_KEY, csv); } catch(e2) { /* quota exceeded */ }
+      await render(rows);
+    } catch(err) {
+      document.getElementById('main').innerHTML = `
+        <div class="loading-wrap"><div class="loading-card">
+          <div style="font-size:28px;margin-bottom:12px">⚠</div>
+          <div style="font-size:13px;color:var(--text-1);margin-bottom:8px">Error llegint el fitxer</div>
+          <div style="font-size:11px;color:var(--text-2)">${err.message}</div>
+          <button onclick="load()" style="margin-top:16px;background:var(--amber);border:none;border-radius:8px;padding:8px 18px;font-weight:700;cursor:pointer;color:#1A0F00">Tornar a intentar</button>
+        </div></div>`;
+    }
+  };
+  reader.onerror = () => showManualCsvFallback();
+  reader.readAsText(file, 'UTF-8');
+}
+
+load();
+
+/* PDF */
+function savePDF() {
+  const btn = document.getElementById('pdfBtn');
+  if (btn) { btn.textContent = '⏳...'; btn.disabled = true; }
+  setTimeout(() => {
+    window.print();
+    setTimeout(() => {
+      if (btn) { btn.textContent = '🖨️ PDF'; btn.disabled = false; }
+    }, 1500);
+  }, 300);
+}
+
+/* FULLSCREEN */
+function toggleFS() {
+  const btn = document.getElementById('fsBtn');
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().then(()=>{ btn.textContent='✕ Sortir'; }).catch(()=>{
+      document.body.style.position='fixed'; document.body.style.inset='0';
+      document.body.style.zIndex='9999'; document.body.style.overflowY='auto';
+      btn.textContent='✕ Reduir';
+      btn.onclick=()=>{ document.body.style.position=''; document.body.style.inset=''; document.body.style.zIndex=''; btn.textContent='⛶ Pantalla completa'; btn.onclick=toggleFS; };
+    });
+  } else { document.exitFullscreen(); btn.textContent='⛶ Pantalla completa'; }
+}
+document.addEventListener('fullscreenchange',()=>{
+  const btn=document.getElementById('fsBtn');
+  if(btn) btn.textContent=document.fullscreenElement?'✕ Sortir':'⛶ Pantalla completa';
+});
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./service-worker.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
