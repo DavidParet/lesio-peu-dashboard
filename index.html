@@ -1015,7 +1015,7 @@ function buildClinicTag(kRow, prevH, trendDelta) {
   return `◈ ${trendPart}${trendTag ? ' · ' + trendTag : ''}${pasPart}${trend7Part}`;
 }
 
-function buildHero(kRow, trendDelta, avg7, aiMsg, risk, recScore, monState, prediction, aiCentral) {
+function buildHero(kRow, trendDelta, avg7, aiMsg, risk, recScore, monState, prediction, aiCentral, isProvisional) {
   const sc = kRow.score;
 
   // Trend chip: avui vs AHIR exacte (no mitjana 7d)
@@ -1116,8 +1116,8 @@ function buildHero(kRow, trendDelta, avg7, aiMsg, risk, recScore, monState, pred
     '<div class="hero-rec-block">',
     `<span class="hero-rec-pct">${recScore!==null?recScore:'—'}<span class="hero-rec-unit">%</span></span>`,
     '<div class="hero-rec-desc-wrap">',
-    `<div class="hero-rec-desc">Índex Funcional</div>`,
-    `<div class="hero-rec-base">Dolor · coixesa · inflamació · activitat · tendència · recaigudes.<br><em style="font-size:8px;opacity:0.7">Indicador orientatiu, no diagnòstic mèdic.</em></div>`,
+    `<div class="hero-rec-desc">Índex Funcional${isProvisional?' <span style="font-size:9px;font-weight:700;padding:1px 7px;border-radius:20px;background:rgba(245,166,35,0.18);color:var(--amber);border:1px solid rgba(245,166,35,0.3);vertical-align:middle">Provisional</span>':''}</div>`,
+    `<div class="hero-rec-base">${isProvisional?'Calculat amb les dades disponibles (dolor matí/vespre). Es recalcularà quan el registre del dia estigui complet.':'Dolor · coixesa · inflamació · activitat · tendència · recaigudes.'}<br><em style="font-size:8px;opacity:0.7">Indicador orientatiu, no diagnòstic mèdic.</em></div>`,
     '</div></div>',
     '</div>',
     // ── Columna dreta: estat + comparativa avui/ahir + frase + badge
@@ -1921,7 +1921,23 @@ async function render(rows) {
   ALL = parseRows(rows);
   ALL_EVENTS = detectVisits(ALL);
   const today = todayISO();
-  const kRow = ALL.find(r => r.iso===today) || ALL[ALL.length-1];
+  const kRowRaw = ALL.find(r => r.iso===today) || ALL[ALL.length-1];
+
+  // Dades parcials: si avui no té score però té dolor o passos → calcular provisional
+  const isToday = kRowRaw.iso === today;
+  const hasPartialData = kRowRaw.score === null &&
+    (kRowRaw.dolorM !== null || kRowRaw.dolorV !== null || kRowRaw.passos !== null);
+  const isProvisional = isToday && hasPartialData;
+
+  let kRow = kRowRaw;
+  if (isProvisional) {
+    const pains = [kRowRaw.dolorM, kRowRaw.dolorV].filter(v => v !== null);
+    const provisionalScore = pains.length > 0
+      ? +(pains.reduce((a,b)=>a+b,0)/pains.length).toFixed(2)
+      : null;
+    kRow = { ...kRowRaw, score: provisionalScore };
+  }
+
   const last = ALL[ALL.length-1];
   const avg7  = avg(ALL.slice(-7).map(r=>r.score));
   const avgP7 = avg(ALL.slice(-14,-7).map(r=>r.score));
@@ -1953,7 +1969,6 @@ Retorna ÚNICAMENT JSON amb exactament aquests 4 camps:
   } catch(e) { /* silenci */ }
 
   setLoadStep('Construint dashboard...');
-  const isToday = kRow.iso===today;
   const insights = computeInsights(kRow, trendDelta, avg7);
   const tol = computeTolerancia();
   const zones = computeZones();
@@ -1968,7 +1983,7 @@ Retorna ÚNICAMENT JSON amb exactament aquests 4 camps:
   }
 
   /* ─ ORDRE: Hero → Mètriques → Context → CORRELACIÓ → TOLERÀNCIA → Timeline → Setmanal → Insights → Historial → Taula ─ */
-  H.push(buildHero(kRow, trendDelta, avg7, aiMsg, risk, recScore, monState, aiPred, aiCentral));
+  H.push(buildHero(kRow, trendDelta, avg7, aiMsg, risk, recScore, monState, aiPred, aiCentral, isProvisional));
   H.push('<div class="sec-lbl">Resum del dia</div>');
   H.push(buildMetrics(kRow));
   H.push(buildAnalisiClinica());
