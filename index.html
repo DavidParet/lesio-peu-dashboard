@@ -254,6 +254,23 @@ table.wt{width:100%;border-collapse:collapse;font-size:12px;min-width:460px}
 .tol-zone-score{font-size:10px;color:var(--text-2)}
 .tol-summary{background:rgba(90,200,250,0.07);border:1px solid rgba(90,200,250,0.13);border-radius:8px;padding:9px 13px;font-size:11px;color:rgba(90,200,250,0.78);line-height:1.65;margin-top:10px}
 .tol-summary strong{color:var(--blue);font-style:normal}
+.tol-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));gap:7px;margin:12px 0}
+.tol-sub-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1.1px;color:var(--text-3);margin:18px 0 8px 1px}
+.tolbtn{padding:4px 12px;border-radius:20px;border:1px solid var(--border-md);background:var(--surface-2);font-size:11px;font-weight:600;color:var(--text-2);cursor:pointer;transition:all 0.15s}
+.tolbtn.on{background:var(--blue);border-color:var(--blue);color:#06222e}
+.tolbtn:hover:not(.on){border-color:var(--border-lg);color:var(--text-1)}
+.tol-concl{border-radius:10px;padding:12px 14px;font-size:11.5px;line-height:1.7;margin-top:10px;border:1px solid}
+.tol-concl strong{color:var(--text-1);font-weight:700}
+.tol-concl-good{background:var(--green-bg);border-color:rgba(46,204,113,0.22);color:rgba(46,204,113,0.92)}
+.tol-concl-info{background:var(--blue-bg);border-color:rgba(90,200,250,0.22);color:rgba(90,200,250,0.92)}
+.tol-concl-warn{background:var(--amber-bg);border-color:rgba(245,166,35,0.22);color:rgba(245,166,35,0.92)}
+.tol-concl-crit{background:var(--red-bg);border-color:rgba(255,69,58,0.22);color:rgba(255,69,58,0.92)}
+.tol-final{background:rgba(255,255,255,0.025);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-top:18px}
+.tol-final-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;margin:6px 0 4px}
+.tol-final-row{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--border);padding-bottom:5px;font-size:11.5px}
+.tol-final-row span:first-child{color:var(--text-2)}
+.tol-final-row span:last-child{font-weight:700;color:var(--text-1);text-align:right}
+@media(max-width:560px){.tol-final-grid{grid-template-columns:1fr}}
 
 /* LOADING */
 .loading-wrap{display:flex;align-items:center;justify-content:center;min-height:80vh}
@@ -391,7 +408,7 @@ const LOCAL_CSV_PATH = './data/registre.csv';
 // localStorage key
 const LS_KEY = 'peu_recovery_csv';
 let ALL = [], FILTER = 30, ALL_EVENTS = [];
-let CHART_OBJ = null, CHART1_OBJ = null, CHART2_OBJ = null, CHART3_OBJ = null, CHART4_OBJ = null;
+let CHART_OBJ = null, CHART1_OBJ = null, CHART2_OBJ = null, CHART3_OBJ = null, CHART4_OBJ = null, CHART5_OBJ = null, CHART6_OBJ = null;
 
 /* ══════════════════════════════════════════════
    PARSERS (INTACTES)
@@ -616,6 +633,14 @@ function fmtH(h) {
   if (!h) return '—';
   const hh = Math.floor(h), mm = Math.round((h%1)*60);
   return `${hh}h${mm?mm+'m':''}`;
+}
+function fmtNum(n) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  return Math.round(n).toLocaleString('ca-ES');
+}
+function fmtPct(v) {
+  if (v === null || v === undefined || isNaN(v)) return '—';
+  return (v >= 0 ? '+' : '') + Math.round(v) + '%';
 }
 
 /* ══════════════════════════════════════════════
@@ -1603,89 +1628,315 @@ function setFilter(f) {
 }
 
 /* ══════════════════════════════════════════════
-   TOLERÀNCIA ALS PASSOS
+   TOLERÀNCIA ALS PASSOS · ANÀLISI CLÍNICA AVANÇADA
 ══════════════════════════════════════════════ */
-function computeTolerancia() {
-  const weeks = computeWeeks(ALL);
-  return weeks.map(w => {
-    const wDays = ALL.filter(r => w.days.includes(r.dia) && r.passos !== null && r.score !== null && r.score > 0);
-    if (wDays.length < 2) return { n: w.n, lbl: w.lbl, lblFull: w.lblFull, index: null, avgPas: w.avgPas, avgSc: w.avgSc, threshold: null, dies: wDays.length };
-    const avgPas = avg(wDays.map(r => r.passos));
-    const avgSc  = avg(wDays.map(r => r.score));
-    const index  = avgSc > 0 ? Math.round(avgPas / avgSc) : null;
-    const goodDays = wDays.filter(r => r.score <= 2.5);
-    const threshold = goodDays.length > 0 ? Math.max(...goodDays.map(r => r.passos)) : null;
-    return { n: w.n, lbl: w.lbl, lblFull: w.lblFull, index, avgPas, avgSc, threshold, dies: wDays.length };
-  });
+let TOL_PERIOD = 30; // 14 | 30 | 'all'
+
+function tolValidDays() {
+  return ALL.filter(r => r.passos !== null && r.score !== null && r.score > 0);
 }
 
-function computeZones() {
-  const zones = [
-    { label: '<1.5k passos', min: 0, max: 1500 },
-    { label: '1.5–3k passos', min: 1500, max: 3000 },
-    { label: '3–4.5k passos', min: 3000, max: 4500 },
-    { label: '>4.5k passos', min: 4500, max: Infinity },
-  ];
-  return zones.map(z => {
-    const days = ALL.filter(r => r.passos !== null && r.score !== null && r.passos >= z.min && r.passos < z.max);
-    return { label: z.label, count: days.length, avgScore: days.length ? avg(days.map(r => r.score)) : null };
-  });
+// Finestra de dies a MOSTRAR segons el període seleccionat (per a estats/zones/càrrega)
+function tolPeriodWindow(period) {
+  const valid = tolValidDays();
+  if (period === 'all') return valid;
+  return valid.slice(-period);
 }
 
-function buildTolerancia(tol, zones) {
-  const validTol = tol.filter(w => w.index !== null);
-  // Lògica de tendència
-  let summaryHtml = '';
-  if (validTol.length >= 2) {
-    const first3 = validTol.slice(0, Math.min(3, validTol.length));
-    const last3  = validTol.slice(-Math.min(3, validTol.length));
-    const avgFirst = avg(first3.map(w => w.index));
-    const avgLast  = avg(last3.map(w => w.index));
-    const lastW = validTol[validTol.length - 1];
-    const prevW = validTol[validTol.length - 2];
-    const weekDelta = lastW && prevW && lastW.index && prevW.index ? lastW.index - prevW.index : null;
-    const trend = avgLast > avgFirst * 1.1 ? '↑ Tolerància creixent' : avgLast < avgFirst * 0.9 ? '↓ Tolerància decreixent' : '→ Tolerància estable';
-    const bestW = [...validTol].sort((a,b) => (b.index||0)-(a.index||0))[0];
-    const thresholdW = validTol.filter(w => w.threshold !== null).slice(-1)[0];
-    const thresholdTxt = thresholdW ? `Llindar de confort actual (dolor ≤2.5): <strong>≤${thresholdW.threshold.toLocaleString('ca-ES')} passos</strong>.` : '';
-    const deltaNote = weekDelta !== null ? ` Variació setmana actual vs anterior: <strong>${weekDelta > 0 ? '+' : ''}${weekDelta.toLocaleString('ca-ES')} pas/punt dolor</strong>.` : '';
-    summaryHtml = `<div class="tol-summary">${trend}. Índex màxim registrat: <strong>${bestW?.lbl} (${bestW?.index?.toLocaleString('ca-ES')} passos/punt dolor)</strong>. ${thresholdTxt}${deltaNote}</div>`;
+// Finestres de COMPARATIVA (actual vs anterior equivalent), independents del que es mostra
+function tolComparisonWindows(period) {
+  const valid = tolValidDays();
+  if (period === 'all') {
+    if (valid.length >= 120) {
+      return { cur: valid.slice(-90), prev: valid.slice(-180, -90), label: 'últims 90 dies vs 90 dies anteriors' };
+    }
+    const half = Math.floor(valid.length / 2);
+    return { cur: valid.slice(half), prev: valid.slice(0, half), label: 'segona meitat vs primera meitat de l’històric' };
   }
+  return { cur: valid.slice(-period), prev: valid.slice(-period*2, -period), label: `últims ${period} dies vs ${period} dies anteriors` };
+}
 
-  // Zones de dolor per rang de passos
-  const zoneColors = ['rgba(46,204,113,0.75)','rgba(241,196,15,0.75)','rgba(255,107,53,0.75)','rgba(255,69,58,0.75)'];
-  const zonesHtml = zones.map((z,i) => {
-    const c = z.avgScore !== null ? scoreClass(z.avgScore) : 'c-neut';
-    return `<div class="tol-zone">
-      <div class="tol-zone-lbl">${z.label}</div>
-      <div class="tol-zone-count" style="color:${zoneColors[i]}">${z.count}</div>
-      <div class="tol-zone-score ${c}">${z.avgScore !== null ? 'dolor mig ' + z.avgScore.toFixed(2) : '—'}</div>
-    </div>`;
-  }).join('');
+function tolStats(days) {
+  if (!days || !days.length) return null;
+  const avgPas = avg(days.map(r => r.passos));
+  const avgDolor = avg(days.map(r => r.score));
+  const index = avgDolor > 0 ? avgPas / avgDolor : null;
+  const eficArr = days.map(r => r.passos / r.score);
+  const avgEficiencia = avg(eficArr);
+  const carregaArr = days.map(r => r.passos * r.score);
+  const carregaTotal = carregaArr.reduce((s,v) => s + v, 0);
+  const carregaMitjDia = carregaTotal / days.length;
+  return { n: days.length, avgPas, avgDolor, index, avgEficiencia, carregaTotal, carregaMitjDia };
+}
 
-  return `<div class="card tol-card">
-    <div class="card-title" style="color:var(--blue)">Tolerància als Passos · Índex Setmanal</div>
-    <div class="card-sub">Càlcul automàtic: passos mig / dolor mig per setmana · evolució de la tolerància funcional</div>
-    <div class="chart-wrap chart-h200"><canvas id="chart4"></canvas></div>
-    <div class="chart-legend">
-      <div class="cl-item"><div class="cl-line" style="background:var(--blue)"></div>Índex tolerància (passos/punt dolor) · eix esq.</div>
-      <div class="cl-item"><div class="cl-zone" style="background:rgba(46,204,113,0.5)"></div>Passos mig setmanal · eix dret</div>
+function pctCh(cur, prev) {
+  if (cur === null || cur === undefined || prev === null || prev === undefined || prev === 0) return null;
+  return ((cur - prev) / prev) * 100;
+}
+
+// Regressió lineal simple (mínims quadrats) — s'usa per dibuixar la línia de tendència temporal
+function linTrend(arr) {
+  const pts = arr.map((v,i) => ({ x:i, y:v })).filter(p => p.y !== null && p.y !== undefined && !isNaN(p.y));
+  if (pts.length < 2) return null;
+  const n = pts.length;
+  const sumX = pts.reduce((s,p) => s+p.x, 0);
+  const sumY = pts.reduce((s,p) => s+p.y, 0);
+  const sumXY = pts.reduce((s,p) => s+p.x*p.y, 0);
+  const sumXX = pts.reduce((s,p) => s+p.x*p.x, 0);
+  const denom = (n*sumXX - sumX*sumX);
+  if (denom === 0) return null;
+  const slope = (n*sumXY - sumX*sumY) / denom;
+  const intercept = (sumY - slope*sumX) / n;
+  return { slope, intercept };
+}
+
+function computeZonesFor(days) {
+  const defs = [
+    { label: '<1.500 passos', min: 0, max: 1500 },
+    { label: '1.500–3.000 passos', min: 1500, max: 3000 },
+    { label: '3.000–4.500 passos', min: 3000, max: 4500 },
+    { label: '>4.500 passos', min: 4500, max: Infinity },
+  ];
+  return defs.map(z => {
+    const d = days.filter(r => r.passos >= z.min && r.passos < z.max);
+    return { label: z.label, count: d.length, avgScore: d.length ? avg(d.map(r => r.score)) : null };
+  });
+}
+
+// Agrupació en blocs de 7 dies (cronològics dins la finestra) per a les gràfiques d'evolució
+function tolWeeklyBuckets(days) {
+  const weeks = [];
+  for (let i = 0; i < days.length; i += 7) {
+    const sl = days.slice(i, i + 7);
+    const avgPas = avg(sl.map(r => r.passos));
+    const avgSc  = avg(sl.map(r => r.score));
+    const index  = avgSc > 0 ? Math.round(avgPas / avgSc) : null;
+    weeks.push({ lbl: sl[0].lbl, lblFull: sl.length > 1 ? `${sl[0].lbl} – ${sl[sl.length-1].lbl}` : sl[0].lbl, index, avgPas: avgPas ? Math.round(avgPas) : null, avgSc, n: sl.length });
+  }
+  return weeks;
+}
+
+function tolWeeklyCarrega(days) {
+  const weeks = [];
+  for (let i = 0; i < days.length; i += 7) {
+    const sl = days.slice(i, i + 7);
+    const total = sl.reduce((s,r) => s + r.passos*r.score, 0);
+    weeks.push({ lbl: sl[0].lbl, lblFull: sl.length > 1 ? `${sl[0].lbl} – ${sl[sl.length-1].lbl}` : sl[0].lbl, total, mitjana: total/sl.length, n: sl.length });
+  }
+  return weeks;
+}
+
+// Eficiència funcional (passos/dolor) calculada sobre TOT l'històric vàlid
+function tolEficienciaHistorica() {
+  const valid = tolValidDays();
+  if (!valid.length) return null;
+  const arr = valid.map(r => ({ iso: r.iso, lbl: r.lbl, dia: r.dia, e: r.passos / r.score }));
+  const sorted = [...arr].sort((a,b) => b.e - a.e);
+  return { best: sorted[0], worst: sorted[sorted.length-1], mitjana: avg(arr.map(x => x.e)), actual: arr[arr.length-1], arr };
+}
+
+// Evolució setmanal de l'eficiència funcional (passos/dolor) sobre tot l'històric vàlid
+function tolWeeklyEficiencia() {
+  const efic = tolEficienciaHistorica();
+  if (!efic || !efic.arr.length) return [];
+  const arr = efic.arr; // ja ordenat cronològicament (mateix ordre que ALL)
+  const weeks = [];
+  for (let i = 0; i < arr.length; i += 7) {
+    const sl = arr.slice(i, i + 7);
+    const avgE = avg(sl.map(x => x.e));
+    weeks.push({ lbl: sl[0].lbl, lblFull: sl.length > 1 ? `${sl[0].lbl} – ${sl[sl.length-1].lbl}` : sl[0].lbl, avgE, n: sl.length });
+  }
+  return weeks;
+}
+
+// Interpretació clínica automàtica (4 nivells de severitat)
+function tolInterpretation(curS, prevS) {
+  if (!curS || !prevS || !curS.index || !prevS.index) {
+    return {
+      level: 'info', badge: 'Sense comparativa suficient', idxPct: null, pasPct: null, dolPct: null,
+      txt: 'Encara no hi ha prou dies registrats en el període de comparació anterior per generar una lectura fiable. A mesura que s’acumulin més dades, la comparativa es generarà automàticament.'
+    };
+  }
+  const idxPct = pctCh(curS.index, prevS.index);
+  const pasPct = pctCh(curS.avgPas, prevS.avgPas);
+  const dolPct = pctCh(curS.avgDolor, prevS.avgDolor);
+  let level, badge;
+  if (idxPct >= 15)       { level = 'good'; badge = 'Millora significativa'; }
+  else if (idxPct >= -5)  { level = 'info'; badge = 'Estable'; }
+  else if (idxPct >= -20) { level = 'warn'; badge = 'Lleuger empitjorament'; }
+  else                    { level = 'crit'; badge = 'Empitjorament clínicament rellevant'; }
+
+  const pasTxt = pasPct === null ? '' : `${Math.abs(Math.round(pasPct))}% ${pasPct >= 0 ? 'més' : 'menys'} activitat`;
+  const dolTxt = dolPct === null ? '' : `un dolor mitjà ${dolPct <= 0 ? Math.abs(Math.round(dolPct)) + '% inferior' : Math.round(dolPct) + '% superior'}`;
+
+  let txt;
+  if (level === 'good') {
+    txt = `La tolerància funcional ha millorat respecte al període anterior (índex ${fmtPct(idxPct)}). El peu tolera ${pasTxt}${pasTxt && dolTxt ? ' amb ' : ''}${dolTxt}, el que indica una evolució clarament favorable.`;
+  } else if (level === 'info') {
+    txt = `La relació entre passos i dolor es manté estable respecte al període anterior (índex ${fmtPct(idxPct)}). No s’observen canvis funcionals rellevants; el procés es troba en una fase de manteniment.`;
+  } else if (level === 'warn') {
+    txt = `S’observa una lleugera disminució de la tolerància funcional respecte al període anterior (índex ${fmtPct(idxPct)}).${dolPct > 0 ? ` El dolor mitjà ha augmentat ${Math.round(dolPct)}% mantenint un nivell d’activitat similar.` : ''} Es recomana vigilar l’evolució dels propers dies.`;
+  } else {
+    txt = `S’observa un empitjorament clínicament rellevant de la tolerància funcional respecte al període anterior (índex ${fmtPct(idxPct)}).${dolPct > 0 ? ` El dolor mitjà ha augmentat ${Math.round(dolPct)}% per a un nivell d’activitat similar.` : ''} Es recomana revisar la càrrega mecànica recent i comentar-ho amb l’equip de fisioteràpia/traumatologia.`;
+  }
+  return { level, badge, idxPct, pasPct, dolPct, txt };
+}
+
+function tolFinalConclusion(periodLbl, dispStats, interp) {
+  const tendTxt = interp.idxPct === null ? 'sense comparativa prèvia suficient'
+    : interp.idxPct >= 5 ? `una tendència ascendent (${fmtPct(interp.idxPct)})`
+    : interp.idxPct <= -5 ? `una tendència descendent (${fmtPct(interp.idxPct)})`
+    : 'una tendència estable';
+  return `Durant ${periodLbl} s’han analitzat ${dispStats.n} dies amb registre vàlid, amb una mitjana de ${fmtNum(dispStats.avgPas)} passos i un dolor mitjà de ${dispStats.avgDolor.toFixed(2)} punts. L’índex de tolerància funcional se situa en ${fmtNum(dispStats.index)} passos per punt de dolor, amb ${tendTxt} respecte al període de comparació. <strong>${interp.badge}</strong>: ${interp.txt}`;
+}
+
+// Bastida estàtica (selector de període + contenidor dinàmic) — es genera 1 cop a render()
+function buildToleranciaWrap() {
+  return `<div class="card tol-card" id="tolCard">
+    <div class="card-title" style="color:var(--blue)">Tolerància als Passos · Anàlisi Clínica Avançada</div>
+    <div class="card-sub">Relació entre càrrega (passos) i resposta (dolor) · recàlcul automàtic segons el període seleccionat</div>
+    <div class="chart-filter">
+      <button class="tolbtn" data-tp="14" onclick="setTolPeriod(14)">14 dies</button>
+      <button class="tolbtn on" data-tp="30" onclick="setTolPeriod(30)">30 dies</button>
+      <button class="tolbtn" data-tp="all" onclick="setTolPeriod('all')">Tot l'històric</button>
     </div>
-    <div class="sec-lbl" style="margin-top:14px">Distribució del dolor per zona d'activitat</div>
-    <div class="tol-zones">${zonesHtml}</div>
-    ${summaryHtml}
+    <div id="tolContent"></div>
   </div>`;
 }
 
-function drawTolerancia(tol) {
+// Canvi de període: NOMÉS recalcula/redibuixa el contingut intern del panell de tolerància
+function setTolPeriod(p) {
+  TOL_PERIOD = p;
+  document.querySelectorAll('.tolbtn').forEach(b => b.classList.toggle('on', String(b.dataset.tp) === String(p)));
+  renderToleranceContent();
+}
+
+// Construeix i pinta tot el contingut dinàmic del panell (es crida a render() i a cada canvi de període)
+function renderToleranceContent() {
+  const container = document.getElementById('tolContent');
+  if (!container) return;
+  const valid = tolValidDays();
+  if (!valid.length) {
+    container.innerHTML = `<div class="tol-summary">Encara no hi ha prou dies amb passos i dolor registrats per generar l’anàlisi de tolerància.</div>`;
+    return;
+  }
+
+  const displayDays = tolPeriodWindow(TOL_PERIOD);
+  const { cur: cmpCur, prev: cmpPrev } = tolComparisonWindows(TOL_PERIOD);
+  const dispStats = tolStats(displayDays);
+  const curCmpStats = tolStats(cmpCur);
+  const prevCmpStats = tolStats(cmpPrev);
+  const interp = tolInterpretation(curCmpStats, prevCmpStats);
+  const zones = computeZonesFor(displayDays);
+  const weeklyIdx = tolWeeklyBuckets(displayDays);
+  const weeklyCarrega = tolWeeklyCarrega(displayDays);
+  const weeklyEficiencia = tolWeeklyEficiencia();
+  const efic = tolEficienciaHistorica();
+  // Dies amb càrrega alta (>4.500 passos) al període actual vs anterior — 4t indicador de la comparativa
+  const diesAlt4500Cur  = cmpCur  ? cmpCur.filter(r => r.passos !== null && r.passos > 4500).length : null;
+  const diesAlt4500Prev = cmpPrev ? cmpPrev.filter(r => r.passos !== null && r.passos > 4500).length : null;
+  const diesAlt4500Delta = (diesAlt4500Cur !== null && diesAlt4500Prev !== null) ? (diesAlt4500Cur - diesAlt4500Prev) : null;
+  const lastDay = valid[valid.length - 1];
+  const periodLbl = TOL_PERIOD === 'all' ? 'tot l’històric' : `els últims ${TOL_PERIOD} dies`;
+  const tendIcon = interp.idxPct === null ? '→' : interp.idxPct >= 5 ? '↑' : interp.idxPct <= -5 ? '↓' : '→';
+  const tendTxt = interp.idxPct === null ? 'sense comparativa' : `${fmtPct(interp.idxPct)} vs període anterior`;
+
+  const zoneColors = ['rgba(46,204,113,0.75)','rgba(241,196,15,0.75)','rgba(255,107,53,0.75)','rgba(255,69,58,0.75)'];
+  const zonesHtml = zones.map((z,i) => `<div class="tol-zone">
+      <div class="tol-zone-lbl">${z.label}</div>
+      <div class="tol-zone-count" style="color:${zoneColors[i]}">${z.count} ${z.count === 1 ? 'dia' : 'dies'}</div>
+      <div class="tol-zone-score ${z.avgScore !== null ? scoreClass(z.avgScore) : 'c-neut'}">${z.avgScore !== null ? 'Dolor mig: ' + z.avgScore.toFixed(2) : 'Sense dades'}</div>
+    </div>`).join('');
+
+  const diesAltTxt = diesAlt4500Delta === null ? '—' : `${diesAlt4500Delta > 0 ? '+' : ''}${diesAlt4500Delta} ${Math.abs(diesAlt4500Delta) === 1 ? 'dia' : 'dies'}`;
+  const cmpHtml = (!curCmpStats || !prevCmpStats) ? '' : `<div class="tol-grid">
+      <div class="tol-zone"><div class="tol-zone-lbl">Passos mitjans</div><div class="tol-zone-count">${interp.pasPct === null ? '—' : fmtPct(interp.pasPct)}</div><div class="tol-zone-score">${fmtNum(prevCmpStats.avgPas)} → ${fmtNum(curCmpStats.avgPas)}</div></div>
+      <div class="tol-zone"><div class="tol-zone-lbl">Dolor mitjà</div><div class="tol-zone-count">${interp.dolPct === null ? '—' : fmtPct(interp.dolPct)}</div><div class="tol-zone-score">${prevCmpStats.avgDolor.toFixed(2)} → ${curCmpStats.avgDolor.toFixed(2)}</div></div>
+      <div class="tol-zone"><div class="tol-zone-lbl">Índex tolerància</div><div class="tol-zone-count">${interp.idxPct === null ? '—' : fmtPct(interp.idxPct)}</div><div class="tol-zone-score">${fmtNum(prevCmpStats.index)} → ${fmtNum(curCmpStats.index)}</div></div>
+      <div class="tol-zone"><div class="tol-zone-lbl">Dies &gt;4.500 passos</div><div class="tol-zone-count" style="color:${diesAlt4500Delta>0?'var(--green)':diesAlt4500Delta<0?'var(--red)':'var(--text-1)'}">${diesAltTxt}</div><div class="tol-zone-score">${diesAlt4500Prev ?? 0} → ${diesAlt4500Cur ?? 0}</div></div>
+    </div>`;
+
+  const effHtml = !efic ? '' : `<div class="tol-grid">
+      <div class="tol-zone"><div class="tol-zone-lbl">Actual (últim dia)</div><div class="tol-zone-count">${fmtNum(efic.actual.e)}</div><div class="tol-zone-score">${efic.actual.lbl}</div></div>
+      <div class="tol-zone"><div class="tol-zone-lbl">Millor registrat</div><div class="tol-zone-count" style="color:var(--green)">${fmtNum(efic.best.e)}</div><div class="tol-zone-score">${efic.best.lbl}</div></div>
+      <div class="tol-zone"><div class="tol-zone-lbl">Pitjor registrat</div><div class="tol-zone-count" style="color:var(--red)">${fmtNum(efic.worst.e)}</div><div class="tol-zone-score">${efic.worst.lbl}</div></div>
+      <div class="tol-zone"><div class="tol-zone-lbl">Mitjana històrica</div><div class="tol-zone-count">${fmtNum(efic.mitjana)}</div><div class="tol-zone-score">passos/punt dolor</div></div>
+    </div>`;
+
+  const finalConclusion = tolFinalConclusion(periodLbl, dispStats, interp);
+  const finalRows = [
+    ['Dies analitzats', `${dispStats.n} dies`],
+    ['Passos mitjans', `${fmtNum(dispStats.avgPas)} passos/dia`],
+    ['Dolor mitjà', dispStats.avgDolor.toFixed(2)],
+    ['Índex de tolerància', `${fmtNum(dispStats.index)} passos/punt dolor`],
+    ['Càrrega acumulada total', fmtNum(dispStats.carregaTotal)],
+    ['Tendència', `${tendIcon} ${tendTxt}`],
+    ['Comparativa', interp.badge],
+  ];
+  const finalRowsHtml = finalRows.map(([k,v]) => `<div class="tol-final-row"><span>${k}</span><span>${v}</span></div>`).join('');
+  const badgeCls = interp.level === 'good' ? 'b-good' : interp.level === 'warn' ? 'b-warn' : interp.level === 'crit' ? 'b-crit' : 'b-info';
+
+  container.innerHTML = `
+    <div class="tol-grid">
+      <div class="tol-zone"><div class="tol-zone-lbl">Passos mitjans</div><div class="tol-zone-count">${fmtNum(dispStats.avgPas)}</div><div class="tol-zone-score">${stepsLabel(dispStats.avgPas)}</div></div>
+      <div class="tol-zone"><div class="tol-zone-lbl">Dolor mitjà</div><div class="tol-zone-count">${dispStats.avgDolor.toFixed(2)}</div><div class="tol-zone-score ${scoreClass(dispStats.avgDolor)}">${painLabel(dispStats.avgDolor)}</div></div>
+      <div class="tol-zone"><div class="tol-zone-lbl">Índex tolerància</div><div class="tol-zone-count" style="color:var(--blue)">${fmtNum(dispStats.index)}</div><div class="tol-zone-score">passos/punt dolor</div></div>
+      <div class="tol-zone"><div class="tol-zone-lbl">Tendència</div><div class="tol-zone-count">${tendIcon}</div><div class="tol-zone-score">${tendTxt}</div></div>
+    </div>
+    <div class="chart-wrap chart-h200"><canvas id="chart4"></canvas></div>
+    <div class="chart-legend">
+      <div class="cl-item"><div class="cl-line" style="background:var(--blue)"></div>Índex tolerància (passos/punt dolor) · eix esq.</div>
+      <div class="cl-item"><div class="cl-zone" style="background:rgba(46,204,113,0.5)"></div>Passos mig · eix dret</div>
+      <div class="cl-item"><div class="cl-line" style="background:var(--red)"></div>Dolor mitjà · escala 0–5</div>
+      <div class="cl-item"><div class="cl-line" style="background:rgba(255,255,255,0.4)"></div>Tendència (regressió lineal)</div>
+    </div>
+
+    <div class="tol-sub-lbl">Distribució per rang de passos · ${periodLbl}</div>
+    <div class="tol-zones">${zonesHtml}</div>
+
+    <div class="tol-sub-lbl">Comparativa amb el període anterior equivalent</div>
+    ${cmpHtml || '<div class="tol-summary">Encara no hi ha prou dies en el període de comparació anterior.</div>'}
+    <div class="tol-concl tol-concl-${interp.level}"><span class="ins-badge ${badgeCls}">${interp.badge}</span><br>${interp.txt}</div>
+
+    <div class="tol-sub-lbl">Càrrega acumulada de dolor (passos × dolor)</div>
+    <div class="tol-grid" style="grid-template-columns:repeat(3,1fr)">
+      <div class="tol-zone"><div class="tol-zone-lbl">Últim dia registrat</div><div class="tol-zone-count">${fmtNum(lastDay.passos * lastDay.score)}</div><div class="tol-zone-score">${lastDay.lbl}</div></div>
+      <div class="tol-zone"><div class="tol-zone-lbl">Mitjana diària del període</div><div class="tol-zone-count">${fmtNum(dispStats.carregaMitjDia)}</div></div>
+      <div class="tol-zone"><div class="tol-zone-lbl">Total del període</div><div class="tol-zone-count" style="color:var(--orange)">${fmtNum(dispStats.carregaTotal)}</div></div>
+    </div>
+    <div class="chart-wrap chart-h160"><canvas id="chart5"></canvas></div>
+
+    <div class="tol-sub-lbl">Eficiència funcional (passos / dolor) · històric complet</div>
+    ${effHtml}
+    <div class="chart-wrap chart-h160"><canvas id="chart6"></canvas></div>
+    <div class="chart-legend">
+      <div class="cl-item"><div class="cl-line" style="background:var(--blue)"></div>Eficiència (passos/punt dolor) · setmanal</div>
+      <div class="cl-item"><div class="cl-line" style="background:rgba(255,255,255,0.35)"></div>Mitjana històrica</div>
+    </div>
+
+    <div class="tol-final">
+      <div class="tol-sub-lbl" style="margin-top:0">Resum del període</div>
+      <div class="tol-final-grid">${finalRowsHtml}</div>
+      <div class="tol-concl tol-concl-${interp.level}">${finalConclusion}</div>
+    </div>
+  `;
+
+  drawToleranceChart(weeklyIdx);
+  drawCarregaChart(weeklyCarrega);
+  drawEficienciaChart(weeklyEficiencia, efic ? efic.mitjana : null);
+}
+
+function drawToleranceChart(weeks) {
   const canvas = document.getElementById('chart4');
   if (!canvas) return;
   if (CHART4_OBJ) { CHART4_OBJ.destroy(); CHART4_OBJ = null; }
-  const validTol = tol.filter(w => w.index !== null);
-  if (validTol.length < 2) return;
-  const labels  = validTol.map(w => w.lbl);
-  const indexes = validTol.map(w => w.index);
-  const passos  = validTol.map(w => w.avgPas ? Math.round(w.avgPas) : null);
+  if (!weeks || weeks.length < 2) return;
+  const labels  = weeks.map(w => w.lbl);
+  const indexes = weeks.map(w => w.index);
+  const passos  = weeks.map(w => w.avgPas);
+  const dolors  = weeks.map(w => (w.avgSc !== null && w.avgSc !== undefined) ? +w.avgSc.toFixed(2) : null);
+  const trend = linTrend(indexes);
+  const trendData = trend ? indexes.map((_,i) => trend.slope*i + trend.intercept) : null;
   const barColors = indexes.map((v, i) =>
     i === 0 || !indexes[i-1] ? 'rgba(90,200,250,0.45)' :
     v >= indexes[i-1] ? 'rgba(46,204,113,0.55)' : 'rgba(255,107,53,0.55)'
@@ -1699,7 +1950,13 @@ function drawTolerancia(tol) {
           backgroundColor:'transparent', borderWidth:2, tension:0.35, pointRadius:4,
           pointBackgroundColor:'#5AC8FA', yAxisID:'yIndex', order:1, z:10 },
         { type:'bar', label:'Passos mig', data:passos, backgroundColor:barColors,
-          borderRadius:4, borderWidth:0, yAxisID:'yPassos', order:2 }
+          borderRadius:4, borderWidth:0, yAxisID:'yPassos', order:4 },
+        { type:'line', label:'Dolor mitjà', data:dolors, borderColor:'#FF453A',
+          backgroundColor:'transparent', borderWidth:2, tension:0.35, pointRadius:3,
+          pointBackgroundColor:'#FF453A', yAxisID:'yDolor', order:2, z:9 },
+        ...(trendData ? [{ type:'line', label:'Tendència', data:trendData, borderColor:'rgba(255,255,255,0.4)',
+          backgroundColor:'transparent', borderWidth:1.5, borderDash:[6,4], pointRadius:0,
+          yAxisID:'yIndex', order:3 }] : [])
       ]
     },
     options: {
@@ -1708,10 +1965,14 @@ function drawTolerancia(tol) {
         tooltip:{ backgroundColor:'#212124', bodyColor:'#F0EBE3',
           borderColor:'rgba(255,255,255,0.08)', borderWidth:1, padding:10, cornerRadius:10,
           callbacks:{
-            title:ctx=>`${validTol[ctx[0].dataIndex]?.lbl} · ${validTol[ctx[0].dataIndex]?.lblFull}`,
-            label:ctx=>ctx.dataset.label==='Índex tolerància'
-              ? `Tolerància: ${ctx.parsed.y?.toLocaleString('ca-ES')} passos/punt dolor`
-              : `Passos mig: ${ctx.parsed.y?.toLocaleString('ca-ES')}`
+            title:ctx=>weeks[ctx[0].dataIndex]?.lblFull || weeks[ctx[0].dataIndex]?.lbl,
+            label:ctx=> {
+              if (ctx.dataset.label === 'Índex tolerància') return `Tolerància: ${ctx.parsed.y?.toLocaleString('ca-ES')} passos/punt dolor`;
+              if (ctx.dataset.label === 'Passos mig') return `Passos mig: ${ctx.parsed.y?.toLocaleString('ca-ES')}`;
+              if (ctx.dataset.label === 'Dolor mitjà') return `Dolor mitjà: ${ctx.parsed.y?.toFixed ? ctx.parsed.y.toFixed(2) : ctx.parsed.y}`;
+              if (ctx.dataset.label === 'Tendència') return 'Tendència (regressió lineal de l’índex)';
+              return `${ctx.dataset.label}: ${ctx.parsed.y}`;
+            }
           }
         }
       },
@@ -1723,11 +1984,348 @@ function drawTolerancia(tol) {
           title:{display:true,text:'passos/dolor',color:'rgba(90,200,250,0.35)',font:{size:8}} },
         yPassos:{ position:'right', min:0, grid:{display:false},
           ticks:{font:{size:9},color:'rgba(46,204,113,0.5)',callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v},
-          border:{display:false} }
+          border:{display:false} },
+        yDolor:{ display:false, min:0, max:5 }
       },
       animation:{duration:400,easing:'easeOutQuart'}
     }
   });
+}
+
+function drawCarregaChart(weeks) {
+  const canvas = document.getElementById('chart5');
+  if (!canvas) return;
+  if (CHART5_OBJ) { CHART5_OBJ.destroy(); CHART5_OBJ = null; }
+  if (!weeks || !weeks.length) return;
+  const labels = weeks.map(w => w.lbl);
+  const data = weeks.map(w => Math.round(w.total));
+  const maxV = Math.max(...data, 1);
+  const colors = data.map(v => v > maxV*0.8 ? 'rgba(255,69,58,0.55)' : v > maxV*0.5 ? 'rgba(255,107,53,0.5)' : 'rgba(90,200,250,0.5)');
+  CHART5_OBJ = new Chart(canvas, {
+    type: 'bar',
+    data: { labels, datasets: [{ label:'Càrrega', data, backgroundColor:colors, borderRadius:4, borderWidth:0 }] },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false},
+        tooltip:{ backgroundColor:'#212124', bodyColor:'#F0EBE3',
+          borderColor:'rgba(255,255,255,0.08)', borderWidth:1, padding:10, cornerRadius:10,
+          callbacks:{ title:ctx=>weeks[ctx[0].dataIndex]?.lblFull, label:ctx=>`Càrrega acumulada: ${ctx.parsed.y.toLocaleString('ca-ES')}` } } },
+      scales:{
+        x:{ ticks:{font:{size:9},color:'#8A8A90'}, grid:{display:false}, border:{display:false} },
+        y:{ min:0, ticks:{font:{size:9},color:'#8A8A90',callback:v=>v>=1000?(v/1000).toFixed(0)+'k':v}, grid:{color:'rgba(255,255,255,0.03)',drawBorder:false}, border:{display:false} }
+      },
+      animation:{duration:400,easing:'easeOutQuart'}
+    }
+  });
+}
+
+function drawEficienciaChart(weeks, mitjana) {
+  const canvas = document.getElementById('chart6');
+  if (!canvas) return;
+  if (CHART6_OBJ) { CHART6_OBJ.destroy(); CHART6_OBJ = null; }
+  if (!weeks || weeks.length < 2) return;
+  const labels = weeks.map(w => w.lbl);
+  const data = weeks.map(w => (w.avgE !== null && w.avgE !== undefined) ? Math.round(w.avgE) : null);
+  const pointColors = data.map((v,i) =>
+    i === 0 || v === null || data[i-1] === null ? '#5AC8FA' :
+    v >= data[i-1] ? '#2ECC71' : '#FF6B35'
+  );
+  const refLine = (mitjana !== null && mitjana !== undefined) ? weeks.map(() => Math.round(mitjana)) : null;
+  CHART6_OBJ = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        { label:'Eficiència', data, borderColor:'#5AC8FA', backgroundColor:'rgba(90,200,250,0.08)',
+          borderWidth:2, tension:0.35, pointRadius:4, pointBackgroundColor:pointColors, fill:true, order:1 },
+        ...(refLine ? [{ label:'Mitjana històrica', data:refLine, borderColor:'rgba(255,255,255,0.35)',
+          backgroundColor:'transparent', borderWidth:1.5, borderDash:[6,4], pointRadius:0, fill:false, order:2 }] : [])
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{display:false},
+        tooltip:{ backgroundColor:'#212124', bodyColor:'#F0EBE3',
+          borderColor:'rgba(255,255,255,0.08)', borderWidth:1, padding:10, cornerRadius:10,
+          callbacks:{
+            title:ctx=>weeks[ctx[0].dataIndex]?.lblFull || weeks[ctx[0].dataIndex]?.lbl,
+            label:ctx=>ctx.dataset.label==='Mitjana històrica'
+              ? `Mitjana històrica: ${ctx.parsed.y?.toLocaleString('ca-ES')} passos/punt dolor`
+              : `Eficiència: ${ctx.parsed.y?.toLocaleString('ca-ES')} passos/punt dolor`
+          }
+        }
+      },
+      scales:{
+        x:{ ticks:{font:{size:9},color:'#8A8A90'}, grid:{display:false}, border:{display:false} },
+        y:{ min:0, ticks:{font:{size:9},color:'#8A8A90',callback:v=>v>=1000?(v/1000).toFixed(1)+'k':v},
+          grid:{color:'rgba(255,255,255,0.03)',drawBorder:false}, border:{display:false} }
+      },
+      animation:{duration:400,easing:'easeOutQuart'}
+    }
+  });
+}
+
+/* ══════════════════════════════════════════════
+   CALENDARI DE FITES DE LA RECUPERACIÓ
+══════════════════════════════════════════════ */
+const FASE_DEFS = [
+  { key:'aguda',        label:'Fase aguda',                  icon:'🔴', color:'#FF453A', min:3.5,       max:Infinity },
+  { key:'descarrega',   label:'Fase de descàrrega',           icon:'🟠', color:'#FF6B35', min:2.8,       max:3.5 },
+  { key:'recinicial',   label:'Fase de recuperació inicial',  icon:'🟡', color:'#F5A623', min:2.0,       max:2.8 },
+  { key:'consolidacio', label:'Fase de consolidació',         icon:'🟢', color:'#2ECC71', min:1.3,       max:2.0 },
+  { key:'funcional',    label:'Recuperació funcional',        icon:'🔵', color:'#5AC8FA', min:-Infinity, max:1.3 }
+];
+function faseForScore(s) {
+  if (s === null || s === undefined || isNaN(s)) return FASE_DEFS[2];
+  return FASE_DEFS.find(f => s >= f.min && s < f.max) || FASE_DEFS[2];
+}
+
+// Sèrie diària amb mitjana mòbil de 7 dies i fase clínica assignada (independent de computeFase, que és per a l'Anàlisi Clínica del dia)
+function computePhaseSeries() {
+  const scores = ALL.map(r => r.score);
+  const smooth = movAvg(scores, 7);
+  return ALL.map((r,i) => ({
+    dia: r.dia, iso: r.iso, lbl: r.lbl, score: r.score,
+    smooth: smooth[i],
+    fase: faseForScore(smooth[i])
+  }));
+}
+
+// Agrupa la sèrie en blocs cronològics per fase, fusionant blocs curts (<3 dies) per evitar soroll puntual
+function computePhaseSegments(series) {
+  if (!series.length) return [];
+  const raw = [];
+  let cur = { faseKey: series[0].fase.key, start: 0, end: 0 };
+  for (let i=1;i<series.length;i++) {
+    if (series[i].fase.key === cur.faseKey) cur.end = i;
+    else { raw.push(cur); cur = { faseKey: series[i].fase.key, start:i, end:i }; }
+  }
+  raw.push(cur);
+  const step1 = [];
+  for (const seg of raw) {
+    const len = seg.end - seg.start + 1;
+    if (len < 3 && step1.length) step1[step1.length-1].end = seg.end;
+    else step1.push({...seg});
+  }
+  const step2 = [];
+  for (const seg of step1) {
+    const last = step2[step2.length-1];
+    if (last && last.faseKey === seg.faseKey) last.end = seg.end;
+    else step2.push({...seg});
+  }
+  return step2.map(seg => ({
+    fase: FASE_DEFS.find(f => f.key === seg.faseKey),
+    startRow: series[seg.start],
+    endRow: series[seg.end],
+    days: seg.end - seg.start + 1
+  }));
+}
+
+// Rècords personals: millor/pitjor dia, rècord de passos amb dolor controlat, ratxa més llarga amb dolor baix
+function computeRecords() {
+  const valid = ALL.filter(r => r.score !== null);
+  if (!valid.length) return { best:null, worst:null, bestSteps:null, longest:null };
+  let best = valid[0], worst = valid[0];
+  for (const r of valid) {
+    if (r.score < best.score) best = r;
+    if (r.score > worst.score) worst = r;
+  }
+  let bestSteps = null;
+  for (const r of ALL) {
+    if (r.score !== null && r.score < 2.5 && r.passos !== null) {
+      if (!bestSteps || r.passos > bestSteps.passos) bestSteps = r;
+    }
+  }
+  let longest = null, curStart = null, curLen = 0, prevDia = null;
+  for (const r of ALL) {
+    const ok = r.score !== null && r.score < 2.0;
+    if (ok) {
+      if (curStart !== null && prevDia !== null && r.dia === prevDia + 1) curLen++;
+      else { curStart = r; curLen = 1; }
+      if (!longest || curLen > longest.len) longest = { start: curStart, end: r, len: curLen };
+    } else {
+      curStart = null; curLen = 0;
+    }
+    prevDia = r.dia;
+  }
+  return { best, worst, bestSteps, longest };
+}
+
+// Moments clau: salts qualitatius més rellevants (millora o empitjorament en finestres de 7 dies)
+function computeKeyMoments(series) {
+  const moments = [];
+  const w = 7;
+  const diffs = [];
+  for (let i=w;i<series.length;i++) {
+    const a = series[i-w].smooth, b = series[i].smooth;
+    if (a===null || b===null) continue;
+    diffs.push({ i, delta: a-b });
+  }
+  if (!diffs.length) return moments;
+  const byImprove = [...diffs].sort((x,y)=>y.delta-x.delta);
+  const top = byImprove[0];
+  if (top && top.delta >= 0.7) {
+    const r = series[top.i], rPrev = series[top.i-w];
+    moments.push({ icon:'📈', tag:'Millora destacada', dia:r.dia, iso:r.iso, lbl:r.lbl,
+      txt:`En ${w} dies, la mitjana mòbil de dolor va baixar de ${rPrev.smooth.toFixed(2)} a ${r.smooth.toFixed(2)}.` });
+  }
+  const byWorsen = [...diffs].sort((x,y)=>x.delta-y.delta);
+  const bottom = byWorsen[0];
+  if (bottom && bottom.delta <= -0.7) {
+    const r = series[bottom.i], rPrev = series[bottom.i-w];
+    moments.push({ icon:'📉', tag:'Empitjorament puntual', dia:r.dia, iso:r.iso, lbl:r.lbl,
+      txt:`En ${w} dies, la mitjana mòbil de dolor va pujar de ${rPrev.smooth.toFixed(2)} a ${r.smooth.toFixed(2)}.` });
+  }
+  return moments.sort((a,b)=>a.dia-b.dia);
+}
+
+// Comparativa percentil del nivell de dolor actual respecte a tot l'històric
+function computeComparativaHistorica(series) {
+  const scores = ALL.map(r=>r.score).filter(v=>v!==null).sort((a,b)=>a-b);
+  if (!scores.length) return null;
+  const cur = series[series.length-1];
+  const current = cur.smooth !== null ? cur.smooth : cur.score;
+  if (current === null) return null;
+  const betterOrEqual = scores.filter(s=>s>=current).length;
+  const pct = Math.round((betterOrEqual/scores.length)*100);
+  return `El nivell de dolor actual (mitjana mòbil ${current.toFixed(2)}) és igual o millor que el ${pct}% dels ${scores.length} dies registrats des de l'inici del seguiment.`;
+}
+
+// Resum automàtic dels darrers 30 dies vs els 30 dies anteriors (mateixos 4 nivells que el panell de Tolerància)
+function compute30DaySummary() {
+  const n = ALL.length;
+  const last30 = ALL.slice(Math.max(0, n-30));
+  const prev30 = ALL.slice(Math.max(0, n-60), Math.max(0, n-30));
+  const avgLast = avg(last30.map(r=>r.score));
+  const avgPrev = avg(prev30.map(r=>r.score));
+  if (avgLast === null) return null;
+  if (avgPrev === null) {
+    return { level:'info', badge:'Sense comparativa suficient',
+      txt:`En els darrers 30 dies, el dolor mitjà ha estat de ${avgLast.toFixed(2)} (escala 0–5). Encara no hi ha prou històric anterior per comparar-ho.` };
+  }
+  const delta = avgPrev - avgLast;
+  let level, badge;
+  if (delta >= 0.4) { level='good'; badge='Millora significativa'; }
+  else if (delta >= -0.1) { level='info'; badge='Estable'; }
+  else if (delta >= -0.4) { level='warn'; badge='Lleuger empitjorament'; }
+  else { level='crit'; badge='Empitjorament clínicament rellevant'; }
+  const txt = `Comparat amb els 30 dies anteriors (dolor mitjà ${avgPrev.toFixed(2)}), els darrers 30 dies mostren ${badge.toLowerCase()}, amb un dolor mitjà de ${avgLast.toFixed(2)}.`;
+  return { level, badge, txt };
+}
+
+// Detecció combinada de fites: inici, visites, ajuts a la marxa, transicions de fase, tolerància, rècords, moments clau, estat actual
+function computeMilestones(series, segments) {
+  const items = [];
+  const first = ALL[0];
+  items.push({ dia:first.dia, iso:first.iso, lbl:first.lbl, icon:'🏁', tag:'Inici del seguiment', col:'#FF453A',
+    txt:`Primer registre. Score inicial ${first.score.toFixed(2)}${first.obs?(' — '+first.obs):''}.` });
+
+  for (const v of detectVisits(ALL)) {
+    items.push({ dia:v.dia, iso:v.iso, lbl:v.lbl, icon:'🚑', tag:v.tag, col:v.col, txt:v.txt||'—' });
+  }
+
+  for (const r of ALL) {
+    const t = ((r.obs||'')+' '+(r.trigger||'')).toLowerCase();
+    if (/muleta|crossa/.test(t)) {
+      items.push({ dia:r.dia, iso:r.iso, lbl:r.lbl, icon:'🩼', tag:'Ajut a la marxa', col:'#FF6B35', txt:r.obs||'Ús d’ajut per a la marxa.' });
+    }
+  }
+
+  for (let i=1;i<segments.length;i++) {
+    const prev = segments[i-1], cur = segments[i];
+    const prevIdx = FASE_DEFS.findIndex(f=>f.key===prev.fase.key);
+    const curIdx  = FASE_DEFS.findIndex(f=>f.key===cur.fase.key);
+    const improving = curIdx > prevIdx;
+    items.push({
+      dia: cur.startRow.dia, iso: cur.startRow.iso, lbl: cur.startRow.lbl,
+      icon: improving ? cur.fase.icon : '📉',
+      tag: improving ? `Pas a ${cur.fase.label}` : `Retrocés a ${cur.fase.label}`,
+      col: cur.fase.color,
+      txt: `Mitjana mòbil de 7 dies: ${cur.startRow.smooth.toFixed(2)}. ${improving ? 'Evolució favorable.' : 'Empitjorament temporal a vigilar.'}`
+    });
+  }
+
+  const toleranceDay = ALL.find(r => r.passos !== null && r.passos > 5000 && r.score !== null && r.score < 2.0);
+  if (toleranceDay) {
+    items.push({ dia:toleranceDay.dia, iso:toleranceDay.iso, lbl:toleranceDay.lbl, icon:'👟', tag:'Tolerància a la càrrega', col:'#5AC8FA',
+      txt:`Primer dia amb més de 5.000 passos i dolor controlat (score ${toleranceDay.score.toFixed(2)}).` });
+  }
+
+  const records = computeRecords();
+  if (records.best) {
+    items.push({ dia:records.best.dia, iso:records.best.iso, lbl:records.best.lbl, icon:'🏆', tag:'Millor dia registrat', col:'#2ECC71',
+      txt:`Score més baix de tot el seguiment: ${records.best.score.toFixed(2)}.` });
+  }
+  if (records.longest && records.longest.len >= 5) {
+    items.push({ dia:records.longest.start.dia, iso:records.longest.start.iso, lbl:records.longest.start.lbl, icon:'🔥', tag:'Inici de ratxa positiva', col:'#F5A623',
+      txt:`Inici de la ratxa més llarga amb dolor baix: ${records.longest.len} dies consecutius amb score sota 2,0.` });
+  }
+
+  for (const m of computeKeyMoments(series)) {
+    items.push({ dia:m.dia, iso:m.iso, lbl:m.lbl, icon:m.icon, tag:m.tag, col: m.icon==='📈' ? '#2ECC71' : '#FF453A', txt:m.txt });
+  }
+
+  const last = ALL[ALL.length-1];
+  const lastFase = series[series.length-1].fase;
+  items.push({ dia:last.dia, iso:last.iso, lbl:last.lbl, icon:'📆', tag:'Estat actual', col:lastFase.color,
+    txt:`Dia ${last.dia} · ${lastFase.label} ${lastFase.icon} · score ${last.score!==null?last.score.toFixed(2):'—'}.` });
+
+  const seen = new Set();
+  return items
+    .filter(it => { const key = it.dia+'|'+it.tag+'|'+it.icon; if (seen.has(key)) return false; seen.add(key); return true; })
+    .sort((a,b)=>a.dia-b.dia);
+}
+
+// Bastida HTML del panell — reutilitza els estils .tl-* (timeline mèdic) i .tol-* (tolerància) ja existents
+function buildFitesWrap() {
+  if (!ALL.length) return '';
+  const series = computePhaseSeries();
+  const segments = computePhaseSegments(series);
+  const milestones = computeMilestones(series, segments);
+  const records = computeRecords();
+  const comparativa = computeComparativaHistorica(series);
+  const summary30 = compute30DaySummary();
+
+  const tlHtml = milestones.map(m => `
+      <div class="tl-item">
+        <div class="tl-dot-wrap">
+          <div class="tl-dot" style="background:${m.col};box-shadow:0 0 0 2px ${m.col}33"></div>
+        </div>
+        <div class="tl-content">
+          <div class="tl-header">
+            <span class="tl-date">${m.lbl}</span>
+            <span class="tl-tag" style="border-color:${m.col}44;color:${m.col}">${m.icon} ${m.tag}</span>
+          </div>
+          <div class="tl-txt">${m.txt}</div>
+        </div>
+      </div>`).join('');
+
+  const recordsHtml = `<div class="tol-grid">
+      <div class="tol-zone"><div class="tol-zone-lbl">Millor dia registrat</div><div class="tol-zone-count" style="color:var(--green)">${records.best?records.best.score.toFixed(2):'—'}</div><div class="tol-zone-score">${records.best?records.best.lbl:'—'}</div></div>
+      <div class="tol-zone"><div class="tol-zone-lbl">Pitjor dia registrat</div><div class="tol-zone-count" style="color:var(--red)">${records.worst?records.worst.score.toFixed(2):'—'}</div><div class="tol-zone-score">${records.worst?records.worst.lbl:'—'}</div></div>
+      <div class="tol-zone"><div class="tol-zone-lbl">Rècord de passos (dolor controlat)</div><div class="tol-zone-count" style="color:var(--blue)">${records.bestSteps?fmtNum(records.bestSteps.passos):'—'}</div><div class="tol-zone-score">${records.bestSteps?(records.bestSteps.lbl+' · score '+records.bestSteps.score.toFixed(2)):'—'}</div></div>
+      <div class="tol-zone"><div class="tol-zone-lbl">Ratxa més llarga (dolor baix)</div><div class="tol-zone-count" style="color:var(--amber)">${records.longest?records.longest.len+' dies':'—'}</div><div class="tol-zone-score">${records.longest?(records.longest.start.lbl+' – '+records.longest.end.lbl):'—'}</div></div>
+    </div>`;
+
+  const summary30BadgeCls = !summary30 ? '' : (summary30.level==='good'?'b-good':summary30.level==='warn'?'b-warn':summary30.level==='crit'?'b-crit':'b-info');
+
+  return `<div class="card" id="fitesCard">
+    <div class="card-title" style="color:var(--amber)">Calendari de Fites de la Recuperació</div>
+    <div class="card-sub">Línia temporal de moments clau, fases clíniques i rècords personals · detecció automàtica</div>
+
+    <div class="tol-sub-lbl">Línia temporal de la recuperació</div>
+    <div class="tl-wrap">
+      <div class="tl-line"></div>
+      ${tlHtml}
+    </div>
+
+    <div class="tol-sub-lbl">Rècords personals</div>
+    ${recordsHtml}
+
+    ${comparativa ? `<div class="tol-sub-lbl">Comparativa històrica</div><div class="tol-summary">${comparativa}</div>` : ''}
+
+    ${summary30 ? `<div class="tol-sub-lbl">Evolució dels darrers 30 dies</div><div class="tol-concl tol-concl-${summary30.level}"><span class="ins-badge ${summary30BadgeCls}">${summary30.badge}</span><br>${summary30.txt}</div>` : ''}
+  </div>`;
 }
 
 /* ══════════════════════════════════════════════
@@ -1970,8 +2568,6 @@ Retorna ÚNICAMENT JSON amb exactament aquests 4 camps:
 
   setLoadStep('Construint dashboard...');
   const insights = computeInsights(kRow, trendDelta, avg7);
-  const tol = computeTolerancia();
-  const zones = computeZones();
   const H = [];
   H.push('<div class="content">');
 
@@ -1990,14 +2586,16 @@ Retorna ÚNICAMENT JSON amb exactament aquests 4 camps:
   H.push(buildContext(kRow, aiCtx));
   H.push('<div class="sec-lbl">Correlació càrrega vs dolor · insight clínic principal</div>');
   H.push(buildCorrelacio());
-  H.push('<div class="sec-lbl">Tolerància als passos · índex setmanal automàtic</div>');
-  H.push(buildTolerancia(tol, zones));
+  H.push('<div class="sec-lbl">Tolerància als passos · anàlisi clínica avançada</div>');
+  H.push(buildToleranciaWrap());
   H.push('<div class="sec-lbl">Evolució temporal · confort i dolor clínic</div>');
   H.push(buildTimeline());
   H.push('<div class="sec-lbl">Tendència setmanal · visió global</div>');
   H.push(buildSetmanal());
   H.push('<div class="sec-lbl">Lectura automàtica del procés</div>');
   H.push(buildInsights(insights));
+  H.push('<div class="sec-lbl">Calendari de fites de la recuperació</div>');
+  H.push(buildFitesWrap());
   H.push('<div class="sec-lbl">Historial mèdic</div>');
   H.push(buildVisits(ALL_EVENTS));
   H.push('<div class="sec-lbl">Comparativa setmanal detallada</div>');
@@ -2011,7 +2609,7 @@ Retorna ÚNICAMENT JSON amb exactament aquests 4 camps:
 
   // Dibuixar totes les gràfiques
   drawPassosDolor(); // chart2 (correlació)
-  drawTolerancia(tol); // chart4 (tolerància)
+  renderToleranceContent(); // tolerància (chart4 + chart5)
   drawChart();       // mainChart
   drawDolorDiari();  // chart1
   drawSetmanal();    // chart3
