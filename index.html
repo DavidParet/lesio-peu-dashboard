@@ -654,18 +654,56 @@ const VISIT_KW = [
   { re: /visita|cita|metge|doctor/i, tag: 'Visita', col: '#2ECC71', chartCol: 'rgba(46,204,113,0.8)' },
   { re: /podol/i, tag: 'Podologia', col: '#FF6B35', chartCol: 'rgba(255,107,53,0.8)' },
 ];
+
+// Visites mèdiques documentades (informes oficials) — prioritat sobre detecció automàtica
+const STATIC_MEDICAL_EVENTS = [
+  { iso:'2026-03-12', lbl:'12-març', dia:0, tag:'RM Tobillo esq.', col:'#8E8E93', chartCol:'rgba(142,142,147,0.8)',
+    txt:'Dr. Zoni (Gavà Central) · FP 8mm + ruptura parcial peroneu (sense gap) + tendinopatia aquilea moderada + edema ossi calcani reactiu' },
+  { iso:'2026-04-13', lbl:'13-abr', dia:25, tag:'Fisio', col:'#5AC8FA', chartCol:'rgba(90,200,250,0.8)',
+    txt:'Inici nova fisioterapeuta amb electroestimulació activa + passos controlats' },
+  { iso:'2026-04-16', lbl:'16-abr', dia:28, tag:'Traumatologia', col:'#FF9500', chartCol:'rgba(255,149,0,0.8)',
+    txt:'Dr. Jordán (Centre Mèdic Castelldefels) · Diagnòstic mecànic + microrotura peroneu. Sol·licita proves addicionals' },
+  { iso:'2026-05-06', lbl:'06-maig', dia:47, tag:'Traumatologia', col:'#FF9500', chartCol:'rgba(255,149,0,0.8)',
+    txt:'Dr. Jordán · FP severa izda + afectació aquilea + peroneu lateral curt. Millora però dolor intens. Continuar RH+electroterapia+magneto' },
+  { iso:'2026-05-08', lbl:'08-maig', dia:49, tag:'Podologia', col:'#FF6B35', chartCol:'rgba(255,107,53,0.8)',
+    txt:'Ajust plantilles ortopèdiques i canvi a calçat més estable' },
+  { iso:'2026-05-13', lbl:'13-maig', dia:54, tag:'Traumatologia', col:'#FF9500', chartCol:'rgba(255,149,0,0.8)',
+    txt:'Dr. Jordán · Petició 10 sessions RHB (FP severa + aquilea + peroneu lateral curt)' },
+  { iso:'2026-05-21', lbl:'21-maig', dia:62, tag:'Traumatologia', col:'#FF9500', chartCol:'rgba(255,149,0,0.8)',
+    txt:'Dr. Ríos Ruh (BCN) · FP recalcitrant no cicatritzant. 15 sessions RHB prescrites. Proposta Orthokine. Peu dret: sobrecàrrega compensatòria. Retorn: mínim 2-3m' },
+  { iso:'2026-06-10', lbl:'10-juny', dia:82, tag:'Traumatologia', col:'#FF9500', chartCol:'rgba(255,149,0,0.8)',
+    txt:'Dr. Jordán · Petició 10 sessions RHB noves (FP + aquilea + peroneu)' },
+  { iso:'2026-06-26', lbl:'26-juny', dia:98, tag:'CAP · Baixa IT', col:'#2ECC71', chartCol:'rgba(46,204,113,0.8)',
+    txt:'Dr. Civera (EAP Gavà 2) · Confirmació IT nº4. Diagnòstic: Fibromatosi fàscia plantar (M72). Pendent COT. Baixa fins 31/07/2026' },
+  { iso:'2026-06-30', lbl:'30-juny', dia:102, tag:'Traumatologia', col:'#FF9500', chartCol:'rgba(255,149,0,0.8)',
+    txt:'Dr. Jordán · Seguiment: millora controlada. Magneto a casa, RH per mútua. Dolor residual FP + aquilea + peroneu. Petició 10 sessions RHB noves' },
+  { iso:'2026-07-15', lbl:'15-jul', dia:117, tag:'Rehabilitació', col:'#5AC8FA', chartCol:'rgba(90,200,250,0.8)',
+    txt:'Centre Mèdic Castelldefels · 41 sessions RHB completades (13/04–15/07). Tècniques: Microones, Exercicis, Crioteràpia, T.N.S., Massatge. Evolució: normal' },
+  { iso:'2026-07-22', lbl:'22-jul', dia:124, tag:'Traumatologia', col:'#FF9500', chartCol:'rgba(255,149,0,0.8)',
+    txt:'Dr. Jordán · Gran millora global. STOP RH. Potenciar EEII + isomètrics. Deambular platja arena. Revalorar setembre. Dx: FP severa + tendinopatia aquilea + edema ossi calcani + peroneu' },
+  { iso:'2026-07-28', lbl:'28-jul', dia:130, tag:'CAP · Baixa IT', col:'#2ECC71', chartCol:'rgba(46,204,113,0.8)',
+    txt:'CAP · Revisió i renovació de baixa. Pendent visita especialista 01/08' },
+  { iso:'2026-08-13', lbl:'13-agost', dia:147, tag:'Prova imatge', col:'#8E8E93', chartCol:'rgba(142,142,147,0.8)',
+    txt:'Prova imatge per sobrecàrrega marxant (incident durant la ratxa positiva del camping)' },
+];
+
 function detectVisits(all) {
-  const visits = [];
+  // Detecció automàtica des de observacions
+  const autoVisits = [];
   for (const r of all) {
     const txt = (r.obs + ' ' + r.trigger).toLowerCase();
     for (const kw of VISIT_KW) {
       if (kw.re.test(txt)) {
-        visits.push({ lbl: r.lbl, iso: r.iso, dia: r.dia, txt: (r.obs||r.trigger||'').slice(0,90), tag: kw.tag, col: kw.col, chartCol: kw.chartCol });
+        autoVisits.push({ lbl: r.lbl, iso: r.iso, dia: r.dia, txt: (r.obs||r.trigger||'').slice(0,90), tag: kw.tag, col: kw.col, chartCol: kw.chartCol });
         break;
       }
     }
   }
-  return visits;
+  // Fusionar: events estàtics (informes oficials) prioritaris sobre els auto-detectats
+  const staticIsos = new Set(STATIC_MEDICAL_EVENTS.map(e => e.iso));
+  const merged = [...STATIC_MEDICAL_EVENTS, ...autoVisits.filter(v => !staticIsos.has(v.iso))];
+  merged.sort((a, b) => a.iso < b.iso ? -1 : a.iso > b.iso ? 1 : 0);
+  return merged;
 }
 function detectWorstDays(data, n=5) {
   const peaks = [];
@@ -1101,9 +1139,13 @@ function buildHero(kRow, trendDelta, avg7, aiMsg, risk, recScore, monState, pred
       return 'Increment de dolor respecte ahir. Revisar l\'activitat recent i els factors desencadenants.';
     if (scDelta !== null && scDelta > 0.15)
       return 'Lleugera regressió respecte ahir. Mantenir el pla terapèutic i vigilar la càrrega.';
-    // Estable — ara per nivell actual
+    // Estable — verificar tendència 7d PRIMER abans de missatge per nivell
+    if (trendDelta !== null && trendDelta < -0.2)
+      return 'Tendència de regressió detectada els últims 7 dies. Revisar la càrrega d\'activitat i els factors desencadenants.';
+    if (trendDelta !== null && trendDelta > 0.3 && sc < 2.0)
+      return 'La recuperació mostra millora sostinguda. Mantenir la constància terapèutica.';
     if (sc < 1.8) return 'El dolor es manté en nivells molt controlats. Bon moment per consolidar progressos.';
-    if (sc < 2.5) return 'La recuperació avança amb constància i sense senyals d\'alerta.';
+    if (sc < 2.5) return 'Estabilitat clínica sense regressions significatives en el nivell actual.';
     if (sc < 3.5) return 'Estabilitat clínica. Seguir el pla de fisioteràpia i monitoritzar la resposta a la càrrega.';
     return 'El dolor persisteix. Prioritzar repòs i seguiment del pla terapèutic.';
   })();
@@ -2384,7 +2426,25 @@ function computeInsights(kRow, trendDelta, avg7) {
       items.push({ icon:'⚡', title:'Càrrega superior a la mitja recent', msg:`Avui ${kRow.passos.toLocaleString('ca-ES')} passos (${Math.round((kRow.passos/prev7avg-1)*100)}% per sobre de la mitja setmanal de ${Math.round(prev7avg).toLocaleString('ca-ES')}). Monitoritzar la resposta en les properes 24–48h.`, badge:'Precaució', badgeCls:'b-warn' });
   }
 
-  return items.slice(0, 5);
+  // Resum últim mes: millor ratxa vs situació actual
+  const last30sc = ALL.filter(r => r.score !== null).slice(-30);
+  if (last30sc.length >= 14) {
+    let bestAvg = Infinity, bestWindow = null;
+    for (let i = 0; i <= last30sc.length - 7; i++) {
+      const w = last30sc.slice(i, i + 7);
+      const a = avg(w.map(r => r.score));
+      if (a !== null && a < bestAvg) { bestAvg = a; bestWindow = w; }
+    }
+    const cur7 = avg(ALL.filter(r => r.score !== null).slice(-7).map(r => r.score));
+    if (bestWindow && cur7 !== null && (cur7 - bestAvg) > 0.25) {
+      const p0 = bestWindow[0].lbl, p1 = bestWindow[bestWindow.length - 1].lbl;
+      items.push({ icon:'📅', title:'Regressió respecte al millor moment del mes',
+        msg:`Millor setmana del mes: ${p0}–${p1} (dolor mig ${bestAvg.toFixed(2)}). Setmana actual: ${cur7.toFixed(2)} (+${(cur7 - bestAvg).toFixed(2)} punts). Identificar els canvis de context o càrrega entre els dos períodes.`,
+        badge:'Últim mes', badgeCls:'b-warn' });
+    }
+  }
+
+  return items.slice(0, 6);
 }
 
 /* ══════════════════════════════════════════════
@@ -2551,7 +2611,7 @@ async function render(rows) {
 AVUI — dia ${kRow.dia}: Score=${kRow.score} (0–5, menor=millor→${scoreLabel(kRow.score)}) · Dolor M/V:${kRow.dolorM}/${kRow.dolorV} · Passos:${kRow.passos||'nr'} · Fisio:${kRow.fisio||'—'} · Inflamació:${kRow.inflam||'—'} · Trigger:${kRow.trigger||'—'} · Obs:${(kRow.obs||'—').slice(0,80)}
 TENDÈNCIA 7d: ${trendDelta!==null?(trendDelta>0.1?'millora':'empitjora'):'estable'} (delta:${trendDelta?.toFixed(2)||'—'}) · RISC:${risk.label} · RecoveryScore:${recScore}
 Retorna ÚNICAMENT JSON amb exactament aquests 4 camps:
-{"central":"10-14 paraules. Frase elegant i tranquil·la, cor emocional del dashboard. Ex: La recuperació avança amb constància i sense senyals d'alerta.",
+{"central":"10-14 paraules. Frase honesta que reflecteix l'estat real: si la tendència 7d empitjora, indica-ho; si millora, celebra-ho; si és estable, digues-ho. No generis frases genèriques positives quan hi ha regressió detectada.",
 "hero":"25-35 paraules clínic. **negreta** en dades clau. Ex: Evolució estable amb lleugera millora funcional. Persistència de sensibilitat plantar amb tolerància moderada a càrrega.",
 "context":"12-18 paraules empàtiques sobre el dia, primera persona propera.",
 "prediction":["bullet 12-14p properes 7-14 dies si es manté tendència","bullet sobre inflamació o fisioteràpia","bullet sobre risc o recomanació subtil"]}`;
