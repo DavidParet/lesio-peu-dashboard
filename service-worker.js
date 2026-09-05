@@ -1,4 +1,4 @@
-const CACHE = 'peu-recovery-v4';
+const CACHE = 'peu-recovery-v5';
 const ASSETS = [
   './',
   './index.html',
